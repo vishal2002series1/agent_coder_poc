@@ -1,0 +1,5 @@
+.venv/
+__pycache__/
+*.pyc
+agentcoder_results.json
+.DS_Store
