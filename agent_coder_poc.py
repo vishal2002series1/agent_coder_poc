@@ -118,6 +118,50 @@ def main():
         3. Handle edge cases like n <= 0
         4. Should be efficient for reasonable values of n (up to 100)
         """
+        requirements = """
+        Create a Python function called 'reverse_string' that:
+        1. Takes a string as input.
+        2. Returns the reversed string.
+        3. Handles edge cases like empty strings and None input.
+        """
+        requirements = """
+        Create a Python function called 'analyze_sentiment' that:
+        1. Takes a text string as input.
+        2. Analyzes the sentiment of the text (positive, negative, neutral).
+        3. Returns a dictionary with 'sentiment' (string) and 'confidence' (float between 0-1).
+        4. Handles edge cases like empty strings and None input.
+        5. The function should work for basic sentiment analysis.
+        """
+        requirements = """
+        Create a Python function called 'analyze_sentiment' that:
+        1. Takes a text string as input.
+        2. Uses the TextBlob library to analyze the sentiment of the text (positive, negative, neutral).
+        3. Returns a dictionary with 'sentiment' (string) and 'confidence' (float between 0-1).
+        4. Handles edge cases like empty strings and None input.
+        5. The function should work for basic sentiment analysis.
+        
+        """
+        requirements = """
+        Create a Python function called 'analyze_sentiment' that:
+        1. Takes a text string as input.
+        2. Uses the TextBlob library to analyze the sentiment of the text (positive, negative, neutral).
+        3. Returns a dictionary with 'sentiment' (string) and 'confidence' (float between 0-1).
+        4. Handles edge cases like empty strings and None input.
+        5. The function should work for basic sentiment analysis.
+        6. In the test cases, just check if the code is getting executed in the environment without any runtime or import or anyother error.
+        """
+
+        requirements = """
+        Create a Python function called 'analyze_sentiment' that:
+        1. Takes a text string as input.
+        2. Uses the TextBlob library to analyze the sentiment of the text (positive, negative, neutral).
+        3. Returns a dictionary with 'sentiment' (string) and 'confidence' (float between 0-1).
+        4. Handles edge cases like empty strings and None input.
+        5. The function should work for basic sentiment analysis.
+        6. In the test cases, DO NOT check for specific output values. Only check that the function runs without raising any exceptions (such as ImportError, RuntimeError, or AssertionError). For each test, simply call the function and ensure no error is raised.
+        7. Example test: try: analyze_sentiment("I love programming!"); except Exception as e: assert False, f"Function raised an exception: {e}"
+        """
+        
         results = agent_coder.generate_and_test_code(requirements)
         agent_coder.save_results(results)
         if results["success"]:
