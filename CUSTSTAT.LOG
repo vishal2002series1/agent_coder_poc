@@ -1,0 +1,12 @@
+Critical Error: [Errno 2] No such file or directory: 'customer_accounts.csv'
+2025-05-30 00:06:16,307 - CRITICAL - Critical error occurred: [Errno 2] No such file or directory: 'CUSTOMER_MASTER_FILE.csv'
+2025-05-30 00:06:27.940061: ERROR - Input file 'CUSTOMER_MASTER_FILE.csv' not found.
+Critical error: [Errno 2] No such file or directory: 'CUSTOMER_MASTER_FILE.csv'
+2025-05-30 00:14:20,909 - Customer ID: 67890, Status changed from Active to Suspended. Reason: Balance overdue > 90 days or no payment for 90 days
+2025-05-30 00:14:45,894 - Customer status changed: Suspended -> Deactivated. Reason: Suspended for 180 days without payment or activity
+2025-05-30 00:23:41,840 - Error loading customer data: [Errno 2] No such file or directory: 'CUSTOMER_MASTER_FILE.csv'
+2025-05-30 00:23:55,754 - Critical error: Unable to load customer data. File not found.
+2025-05-30 00:23:55,754 - Critical error: Unable to load customer data. Process aborted.
+2025-05-30 00:24:06,339 - Customer ID: 1 - Status changed from Suspended to Active. Reason: Payment received, balance cleared
+2025-05-30 00:24:06,339 - Customer ID: 2 - Status changed from Active to Delinquent. Reason: Balance overdue > 60 days
+2025-05-30 00:24:06,339 - Customer ID: 3 - Status changed from Delinquent to Suspended. Reason: Balance overdue > 90 days or no payment for 90 days

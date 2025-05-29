@@ -1,85 +1,133 @@
-# programmer_agent.py
-import openai  # Import the OpenAI library
-from typing import Dict, Any, Optional  # Import typing hints for better code readability
-import json  # Import the JSON library for handling JSON data
+# programmer_agent.py (corrected)
+import openai
+from typing import Dict, Any, Optional
+from language_config import TargetLanguage, LanguageConfig
 
-class ProgrammerAgent:  # Define the ProgrammerAgent class
-    def __init__(self, api_key: str, endpoint: str, deployment: str, api_version: str):
-        # Initialize the ProgrammerAgent with Azure OpenAI credentials
+class ProgrammerAgent:
+    def __init__(self, api_key: str, endpoint: str, deployment: str, api_version: str, target_language: TargetLanguage):
         self.client = openai.AzureOpenAI(
-            api_key=api_key,  # Your Azure OpenAI API key
-            azure_endpoint=endpoint,  # Your Azure OpenAI endpoint
-            api_version=api_version  # Your Azure OpenAI API version
+            api_key=api_key,
+            azure_endpoint=endpoint,
+            api_version=api_version
         )
-        self.deployment = deployment  # The deployment name for the OpenAI model
+        self.deployment = deployment
+        self.target_language = target_language
+        self.lang_config = LanguageConfig().get_config(target_language)
 
-    def generate_code(self, requirements: str, feedback: Optional[str] = None) -> Dict[str, Any]:
-        """Generate Python code based on requirements and optional feedback"""
+    def generate_code_with_context(self, context):
+        """Generate code with full context including previous attempts and errors"""
+        requirements = context["requirements"]
+        tests = context["tests"]
+        previous_attempts = context["previous_attempts"]
 
-        if feedback:
-            prompt = f"""
-**Role**: You are a software programmer.
-**Task**: Fix the code based on the compilation/execution error feedback.
+        language_name = self.target_language.value.title()
+        code_marker = self.lang_config["code_block_marker"]
 
-**Original Requirements**: {requirements}
+        # Build a comprehensive prompt
+        prompt = f"""
+You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.
 
-**Error Feedback**: {feedback}
+REQUIREMENTS:
+{requirements}
 
-**Instructions**:
-1. **Understand the Error**: Analyze the error message carefully
-2. **Identify the Issue**: Determine what's causing the compilation/execution error
-3. **Fix the Code**: Provide corrected Python code
-4. **Ensure Modularity**: Write clean, modular code with proper imports
+TESTS TO PASS:
+{tests}
 
-Please provide only the corrected Python code wrapped in ```python blocks.
+IMPORTANT: Use the exact same field names and data structures as shown in the tests.
 """
-        else:
-            prompt = f"""
-**Role**: You are a software programmer.
-**Task**: Generate Python code based on requirements using Chain-of-Thought approach.
 
-**Requirements**: {requirements}
+        # Add context from previous failed attempts
+        if previous_attempts:
+            prompt += "\n\nPREVIOUS FAILED ATTEMPTS:\n"
+            for i, attempt in enumerate(previous_attempts[-3:], 1):  # Show last 3 attempts
+                prompt += f"""
+                Attempt {attempt.get('iteration', i)}:
+                - Error Type: {attempt.get('error_type', 'Unknown')}
+                - Error Stage: {attempt.get('error_stage', 'Unknown')}
+                - Error Details: {str(attempt.get('error', ''))[:500]}...
+                - Code that failed:
+                ```{self.target_language.value}
+                {str(attempt.get('code', ''))[:1000]}...
 
-**Instructions**:
-1. **Understand and Clarify**: Understand the task requirements
-2. **Algorithm/Method Selection**: Choose the most efficient approach
-3. **Pseudocode Creation**: Plan the implementation steps
-4. **Code Generation**: Write clean, modular Python code
+                """
+            prompt += """
+            LEARN FROM THESE ERRORS:
 
-Please provide the Python code wrapped in ```python blocks.
-"""
+            Fix the specific issues mentioned in the error messages
+            Ensure field names match exactly between your code and the tests
+            Handle edge cases properly
+            Make sure your code structure is compatible with the test expectations
+            """
+
+        prompt += f"""
+            Generate the {language_name} code wrapped in {code_marker} blocks.
+            The code should be ready to run with the provided tests.
+            """
 
         try:
             response = self.client.chat.completions.create(
-                model=self.deployment,  # Use the specified deployment
-                messages=[{"role": "user", "content": prompt}],  # Send the prompt to the OpenAI API
-                temperature=0.1,  # Set the temperature for controlling randomness (lower is more deterministic)
-                max_tokens=2000  # Set the maximum number of tokens in the response
+                model=self.deployment,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=2000
             )
 
-            content = response.choices[0].message.content  # Extract the content from the response
-
-            # Extract code from response
-            if "```python" in content:
-                code_start = content.find("```python") + 9  # Find the start of the Python code block
-                code_end = content.find("```", code_start)  # Find the end of the Python code block
-                code = content[code_start:code_end].strip()  # Extract the code and remove leading/trailing whitespace
-            elif "```" in content:
-                code_start = content.find("```") + 3  # Find the start of the code block
-                code_end = content.find("```", code_start)  # Find the end of the code block
-                code = content[code_start:code_end].strip()  # Extract the code and remove leading/trailing whitespace
-            else:
-                code = content.strip()  # If no code block is found, extract the entire content and remove whitespace
+            content = response.choices[0].message.content
+            code = self._extract_code(content, code_marker)
 
             return {
-                "success": True,  # Indicate that the code generation was successful
-                "code": code,  # The generated code
-                "full_response": content  # The full response from the OpenAI API
+                "success": True,
+                "code": code,
+                "full_response": content,
+                "language": self.target_language.value
             }
 
         except Exception as e:
             return {
-                "success": False,  # Indicate that the code generation failed
-                "error": str(e),  # The error message
-                "code": None  # No code was generated
+                "success": False,
+                "error": str(e),
+                "code": None,
+                "language": self.target_language.value
             }
+
+    def generate_code(self, requirements: str, feedback: Optional[str] = None) -> Dict[str, Any]:
+        """Backward compatible method - generate code based on requirements and optional feedback"""
+
+        # If no feedback, use simple context
+        if not feedback:
+            context = {
+                "requirements": requirements,
+                "tests": "",
+                "previous_attempts": [],
+                "iteration_history": []
+            }
+            return self.generate_code_with_context(context)
+
+        # If feedback exists, create context with previous attempt
+        context = {
+            "requirements": requirements,
+            "tests": "",
+            "previous_attempts": [{
+                "error": feedback,
+                "error_type": "Unknown",
+                "error_stage": "execution",
+                "iteration": 1,
+                "code": ""
+            }],
+            "iteration_history": []
+        }
+        return self.generate_code_with_context(context)
+
+    def _extract_code(self, content: str, code_marker: str) -> str:
+        """Extract code from response based on language marker"""
+        if code_marker in content:
+            code_start = content.find(code_marker) + len(code_marker)
+            code_end = content.find("", code_start)               
+            code = content[code_start:code_end].strip()           
+        elif "" in content:
+            code_start = content.find("") + 3               
+            code_end = content.find("", code_start)
+            code = content[code_start:code_end].strip()
+        else:
+            code = content.strip()
+        return code

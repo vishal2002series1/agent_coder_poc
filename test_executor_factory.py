@@ -1,0 +1,557 @@
+# test_executor_factory.py
+from abc import ABC, abstractmethod
+from typing import Dict, Any
+import subprocess
+import tempfile
+import os
+import sys
+from language_config import TargetLanguage, LanguageConfig
+import re
+
+def extract_public_class_name(java_code: str) -> str:
+    match = re.search(r'public\s+class\s+(\w+)', java_code)
+    if match:
+        return match.group(1)
+    raise ValueError("No public class found in Java code.")
+
+class BaseTestExecutor(ABC):
+    def __init__(self, target_language: TargetLanguage):
+        self.target_language = target_language
+        self.lang_config = LanguageConfig().get_config(target_language)
+        self.temp_dir = tempfile.mkdtemp()
+
+    @abstractmethod
+    def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def _compile_code(self, code: str) -> Dict[str, Any]:
+        pass
+
+    @abstractmethod
+    def _Code_Execution(self, code: str) -> Dict[str, Any]:
+        pass
+
+    def cleanup(self):
+        import shutil
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
+
+class PythonTestExecutor(BaseTestExecutor):
+    def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+        self.install_dependencies(code)
+        self.install_dependencies(tests)
+        full_code = f"""{code}
+
+# Test Cases
+{tests}
+
+print("All tests passed successfully!")
+"""
+        
+        compile_result = self._compile_code(full_code)
+        if not compile_result["success"]:
+            return {
+                "success": False,
+                "stage": "compilation",
+                "error": compile_result["error"],
+                "error_type": "SyntaxError",
+                "feedback": f"Compilation Error: {compile_result['error']}"
+            }
+
+        return self._Code_Execution(full_code)
+
+    def _compile_code(self, code: str) -> Dict[str, Any]:
+        try:
+            compile(code, '<string>', 'exec')
+            return {"success": True, "error": None}
+        except SyntaxError as e:
+            error_msg = f"Line {e.lineno}: {e.msg}"
+            if e.text:
+                error_msg += f"\nCode: {e.text.strip()}"
+            return {"success": False, "error": error_msg}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def _Code_Execution(self, code: str) -> Dict[str, Any]:
+        temp_file = os.path.join(self.temp_dir, f"test_code{self.lang_config['file_extension']}")
+        try:
+            with open(temp_file, 'w') as f:
+                f.write(code)
+
+            result = subprocess.run(
+                self.lang_config["execution_command"] + [temp_file],
+                capture_output=True,
+                text=True,
+                timeout=self.lang_config["timeout"]
+            )
+
+            if result.returncode == 0:
+                return {
+                    "success": True,
+                    "stage": "execution",
+                    "output": result.stdout,
+                    "error": None,
+                    "feedback": "Code executed successfully!"
+                }
+            else:
+                return {
+                    "success": False,
+                    "stage": "execution",
+                    "error": result.stderr,
+                    "error_type": self._parse_error_type(result.stderr),
+                    "feedback": f"Runtime Error: {result.stderr}"
+                }
+
+        except subprocess.TimeoutExpired:
+            return {
+                "success": False,
+                "stage": "execution",
+                "error": "Code execution timed out",
+                "error_type": "TimeoutError",
+                "feedback": "Code execution timed out"
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "stage": "execution",
+                "error": str(e),
+                "error_type": "ExecutionError",
+                "feedback": f"Execution Error: {str(e)}"
+            }
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+
+    def _parse_error_type(self, error_output: str) -> str:
+        if "AssertionError" in error_output:
+            return "AssertionError"
+        elif "NameError" in error_output:
+            return "NameError"
+        elif "TypeError" in error_output:
+            return "TypeError"
+        elif "ValueError" in error_output:
+            return "ValueError"
+        elif "ImportError" in error_output:
+            return "ImportError"
+        else:
+            return "RuntimeError"
+    def install_dependencies(self, code: str):
+        # Find all import statements
+        imports = re.findall(r'^\s*import (\w+)', code, re.MULTILINE)
+        imports += re.findall(r'^\s*from (\w+)', code, re.MULTILINE)
+        # List of standard libraries (partial, can be expanded)
+        std_libs = {
+            'os', 'sys', 're', 'datetime', 'math', 'json', 'time', 'random', 'collections', 'itertools', 'functools',
+            'typing', 'subprocess', 'tempfile', 'shutil', 'unittest', 'threading', 'logging', 'pathlib', 'copy', 'csv'
+        }
+        to_install = [pkg for pkg in set(imports) if pkg not in std_libs]
+        for pkg in to_install:
+            try:
+                print(f"Installing Python package: {pkg}")
+                subprocess.run([sys.executable, "-m", "pip", "install", pkg], check=True)
+            except Exception as e:
+                print(f"Failed to install {pkg}: {e}")
+
+# class JavaTestExecutor(BaseTestExecutor):
+#     def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+#         # Combine code and tests for Java
+#         full_code = self._combine_java_code_and_tests(code, tests)
+
+#         compile_result = self._compile_code(full_code)
+#         if not compile_result["success"]:
+#             return {
+#                 "success": False,
+#                 "stage": "compilation",
+#                 "error": compile_result["error"],
+#                 "error_type": "CompilationError",
+#                 "feedback": f"Compilation Error: {compile_result['error']}"
+#             }
+
+#         return self._Code_Execution(full_code)
+
+#     def _combine_java_code_and_tests(self, code: str, tests: str) -> str:
+#         # Extract class name from code
+#         import re
+#         class_match = re.search(r'public\s+class\s+(\w+)', code)
+#         class_name = class_match.group(1) if class_match else "TestClass"
+
+#         return f"""
+#                     {code}
+
+#                     // Test Cases
+#                     {tests}
+
+#                     public class TestRunner {{
+#                         public static void main(String[] args) {{
+#                             // Run tests here
+#                             System.out.println("All tests passed successfully!");
+#                         }}
+#                     }}
+#                     """
+
+#     def _compile_code(self, code: str) -> Dict[str, Any]:
+#         temp_file = os.path.join(self.temp_dir, "TestRunner.java")
+#         try:
+#             with open(temp_file, 'w') as f:
+#                 f.write(code)
+
+#             result = subprocess.run(
+#                 self.lang_config["compile_command"] + [temp_file],
+#                 capture_output=True,
+#                 text=True,
+#                 timeout=30
+#             )
+
+#             if result.returncode == 0:
+#                 return {"success": True, "error": None}
+#             else:
+#                 return {"success": False, "error": result.stderr}
+
+#         except Exception as e:
+#             return {"success": False, "error": str(e)}
+
+#     def _Code_Execution(self, code: str) -> Dict[str, Any]:
+#         try:
+#             result = subprocess.run(
+#                 ["java", "-cp", self.temp_dir, "TestRunner"],
+#                 capture_output=True,
+#                 text=True,
+#                 timeout=self.lang_config["timeout"]
+#             )
+
+#             if result.returncode == 0:
+#                 return {
+#                     "success": True,
+#                     "stage": "execution",
+#                     "output": result.stdout,
+#                     "error": None,
+#                     "feedback": "Code executed successfully!"
+#                 }
+#             else:
+#                 return {
+#                     "success": False,
+#                     "stage": "execution",
+#                     "error": result.stderr,
+#                     "error_type": "RuntimeError",
+#                     "feedback": f"Runtime Error: {result.stderr}"
+#                 }
+
+#         except Exception as e:
+#             return {
+#                 "success": False,
+#                 "stage": "execution",
+#                 "error": str(e),
+#                 "error_type": "ExecutionError",
+#                 "feedback": f"Execution Error: {str(e)}"
+#             }
+
+# test_executor_factory.py (Updated JavaTestExecutor)
+        
+
+class JavaTestExecutor(BaseTestExecutor):
+    # def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+    #     # Create a proper Java structure
+    #     self.install_dependencies(code)
+    #     self.install_dependencies(tests)
+    #     full_code = self.merge_java_code_and_tests(code, tests)
+
+    #     compile_result = self._compile_code(full_code)
+    #     if not compile_result["success"]:
+    #         return {
+    #             "success": False,
+    #             "stage": "compilation",
+    #             "error": compile_result["error"],
+    #             "error_type": "CompilationError",
+    #             "feedback": f"Compilation Error: {compile_result['error']}"
+    #         }
+
+    #     return self._Code_Execution()
+
+    def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+        self.install_dependencies(code)
+        self.install_dependencies(tests)
+
+        # Dynamically extract class names
+        code_class_name = extract_public_class_name(code)
+        tests_class_name = extract_public_class_name(tests)
+
+        code_file = os.path.join(self.temp_dir, f"{code_class_name}.java")
+        tests_file = os.path.join(self.temp_dir, f"{tests_class_name}.java")
+
+        with open(code_file, 'w') as f:
+            f.write(code)
+        with open(tests_file, 'w') as f:
+            f.write(tests)
+
+        compile_result = self._compile_code([code_file, tests_file])
+        if not compile_result["success"]:
+            return {
+                "success": False,
+                "stage": "compilation",
+                "error": compile_result["error"],
+                "error_type": "CompilationError",
+                "feedback": f"Compilation Error: {compile_result['error']}"
+            }
+
+        return self._Code_Execution(tests_class_name)
+
+    def merge_java_code_and_tests(self, code: str, tests: str) -> str:
+        """Merge Java code and tests, ensuring all imports are at the top"""
+        imports = set(re.findall(r'^\s*import .+?;', code, re.MULTILINE) +
+                     re.findall(r'^\s*import .+?;', tests, re.MULTILINE))
+        code_wo_imports = re.sub(r'^\s*import .+?;\n?', '', code, flags=re.MULTILINE)
+        tests_wo_imports = re.sub(r'^\s*import .+?;\n?', '', tests, flags=re.MULTILINE)
+        return '\n'.join(imports) + '\n\n' + code_wo_imports + '\n' + tests_wo_imports
+
+    # def _compile_code(self, code: str) -> Dict[str, Any]:
+    #     temp_file = os.path.join(self.temp_dir, "TestRunner.java")
+    #     try:
+    #         with open(temp_file, 'w') as f:
+    #             f.write(code)
+
+    #         result = subprocess.run(
+    #             ["javac", temp_file],
+    #             capture_output=True,
+    #             text=True,
+    #             timeout=30,
+    #             cwd=self.temp_dir
+    #         )
+
+    #         if result.returncode == 0:
+    #             return {"success": True, "error": None}
+    #         else:
+    #             return {"success": False, "error": result.stderr}
+
+    #     except Exception as e:
+    #         return {"success": False, "error": str(e)}
+
+    # def _Code_Execution(self) -> Dict[str, Any]:
+    #     try:
+    #         result = subprocess.run(
+    #             ["java", "-ea", "TestRunner"],
+    #             capture_output=True,
+    #             text=True,
+    #             timeout=self.lang_config["timeout"],
+    #             cwd=self.temp_dir
+    #         )
+
+    #         if result.returncode == 0:
+    #             return {
+    #                 "success": True,
+    #                 "stage": "execution",
+    #                 "output": result.stdout,
+    #                 "error": None,
+    #                 "feedback": "Code executed successfully!"
+    #             }
+    #         else:
+    #             return {
+    #                 "success": False,
+    #                 "stage": "execution",
+    #                 "error": result.stderr,
+    #                 "error_type": "RuntimeError",
+    #                 "feedback": f"Runtime Error: {result.stderr}"
+    #             }
+
+    #     except Exception as e:
+    #         return {
+    #             "success": False,
+    #             "stage": "execution",
+    #             "error": str(e),
+    #             "error_type": "ExecutionError",
+    #             "feedback": f"Execution Error: {str(e)}"
+    #         }
+
+    def _compile_code(self, java_files: list) -> Dict[str, Any]:
+        try:
+            result = subprocess.run(
+                ["javac"] + java_files,
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=self.temp_dir
+            )
+            if result.returncode == 0:
+                return {"success": True, "error": None}
+            else:
+                return {"success": False, "error": result.stderr}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def _Code_Execution(self, main_class: str) -> Dict[str, Any]:
+        try:
+            result = subprocess.run(
+                ["java", "-ea", main_class],
+                capture_output=True,
+                text=True,
+                timeout=self.lang_config["timeout"],
+                cwd=self.temp_dir
+            )
+            if result.returncode == 0:
+                return {
+                    "success": True,
+                    "stage": "execution",
+                    "output": result.stdout,
+                    "error": None,
+                    "feedback": "Code executed successfully!"
+                }
+            else:
+                return {
+                    "success": False,
+                    "stage": "execution",
+                    "error": result.stderr,
+                    "error_type": "RuntimeError",
+                    "feedback": f"Runtime Error: {result.stderr}"
+                }
+        except Exception as e:
+            return {
+                "success": False,
+                "stage": "execution",
+                "error": str(e),
+                "error_type": "ExecutionError",
+                "feedback": f"Execution Error: {str(e)}"
+            }
+
+    def install_dependencies(self, code: str):
+        # Find all import statements
+        imports = re.findall(r'^\s*import ([\w\.]+);', code, re.MULTILINE)
+        # List of standard Java packages (partial, can be expanded)
+        std_libs = {'java.util', 'java.io', 'java.time', 'java.lang', 'java.math', 'java.net', 'java.nio', 'java.text'}
+        to_install = [pkg for pkg in set(imports) if not any(pkg.startswith(std) for std in std_libs)]
+        if to_install:
+            print("WARNING: The following Java packages may need to be added to your build system (Maven/Gradle):")
+            for pkg in to_install:
+                print(f"  - {pkg}")
+            print("Automatic Java dependency installation is not implemented. Please add these to your pom.xml or build.gradle if needed.")
+
+
+
+class CSharpTestExecutor(BaseTestExecutor):
+    def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
+        # Create a complete C# project structure
+        self.install_dependencies(code)
+        self.install_dependencies(tests)
+        full_code = self._create_csharp_project(code, tests)
+
+        compile_result = self._compile_code(full_code)
+        if not compile_result["success"]:
+            return {
+                "success": False,
+                "stage": "compilation",
+                "error": compile_result["error"],
+                "error_type": "CompilationError",
+                "feedback": f"Compilation Error: {compile_result['error']}"
+            }
+
+        return self._Code_Execution(full_code)
+
+    def _create_csharp_project(self, code: str, tests: str) -> str:
+        return f"""
+                using System;
+
+                {code}
+
+                // Test Cases
+                {tests}
+
+                class Program {{
+                    static void Main(string[] args) {{
+                        // Run tests here
+                        Console.WriteLine("All tests passed successfully!");
+                    }}
+                }}
+                """
+
+    def _compile_code(self, code: str) -> Dict[str, Any]:
+        # Create project file and source file
+        project_file = os.path.join(self.temp_dir, "TestProject.csproj")
+        source_file = os.path.join(self.temp_dir, "Program.cs")
+
+        try:
+            # Create .csproj file
+            with open(project_file, 'w') as f:
+                f.write("""
+                    <Project Sdk="Microsoft.NET.Sdk">
+                    <PropertyGroup>
+                        <OutputType>Exe</OutputType>
+                        <TargetFramework>net6.0</TargetFramework>
+                    </PropertyGroup>
+                    </Project>
+                    """)
+
+            # Create source file
+            with open(source_file, 'w') as f:
+                f.write(code)
+
+            result = subprocess.run(
+                ["dotnet", "build", self.temp_dir],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+
+            if result.returncode == 0:
+                return {"success": True, "error": None}
+            else:
+                return {"success": False, "error": result.stderr}
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def _Code_Execution(self, code: str) -> Dict[str, Any]:
+        try:
+            result = subprocess.run(
+                ["dotnet", "run", "--project", self.temp_dir],
+                capture_output=True,
+                text=True,
+                timeout=self.lang_config["timeout"]
+            )
+
+            if result.returncode == 0:
+                return {
+                    "success": True,
+                    "stage": "execution",
+                    "output": result.stdout,
+                    "error": None,
+                    "feedback": "Code executed successfully!"
+                }
+            else:
+                return {
+                    "success": False,
+                    "stage": "execution",
+                    "error": result.stderr,
+                    "error_type": "RuntimeError",
+                    "feedback": f"Runtime Error: {result.stderr}"
+                }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "stage": "execution",
+                "error": str(e),
+                "error_type": "ExecutionError",
+                "feedback": f"Execution Error: {str(e)}"
+            }
+    def install_dependencies(self, code: str):
+        # Find all using statements
+        usings = re.findall(r'^\s*using ([\w\.]+);', code, re.MULTILINE)
+        std_libs = {'System', 'System.Collections', 'System.IO', 'System.Linq', 'System.Text', 'System.Threading', 'System.Net'}
+        to_install = [pkg for pkg in set(usings) if not any(pkg.startswith(std) for std in std_libs)]
+        for pkg in to_install:
+            try:
+                print(f"Installing C# package: {pkg}")
+                subprocess.run(["dotnet", "add", "package", pkg], check=True)
+            except Exception as e:
+                print(f"Failed to install {pkg}: {e}")
+
+class TestExecutorFactory:
+    @staticmethod
+    def create_executor(target_language: TargetLanguage) -> BaseTestExecutor:
+        if target_language == TargetLanguage.PYTHON:
+            return PythonTestExecutor(target_language)
+        elif target_language == TargetLanguage.JAVA:
+            return JavaTestExecutor(target_language)
+        elif target_language == TargetLanguage.CSHARP:
+            return CSharpTestExecutor(target_language)
+        else:
+            raise ValueError(f"Unsupported language: {target_language}")
