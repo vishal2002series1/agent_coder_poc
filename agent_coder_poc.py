@@ -1,5 +1,5 @@
 # agent_coder_poc.py (modified)
-from programmer_agent_old import ProgrammerAgent
+from programmer_agent import ProgrammerAgent
 from test_designer_agent import TestDesignerAgent
 from test_executor_factory import TestExecutorFactory
 from language_config import TargetLanguage
@@ -61,6 +61,7 @@ class AgentCoderPOC:
                 print(f"❌ {language_name} code generation failed: {code_result['error']}")
                 continue
             code = code_result["code"]
+            print(f"--- Extracted code for {self.target_language.value} ---\n{code}\n--- End of code ---")
             print(f"✅ {language_name} code generated")
 
             # Execute code with tests
@@ -171,13 +172,133 @@ def main():
 
         """
     
-    requirements = """
+    requirements1 = """
     Create a function called 'reverse_string' that:
     1. Takes a string as input.
     2. Returns the reversed string.
     3. Handles edge cases like empty strings and null input.
+    4. It should be a complete code file with all the necessary imports and a main function to run the code.
+    For example, if the target code is python, then the generated code should be a complete python file with the function defined and a main block to execute it.
+    ** Avoid using string quotes in the code generation e.g '''python or ''' Java, as it can lead to issues with test case generation.
+    ** It should be a complete code file with all the necessary imports and a main function to run the code.
+    ** It should just not be a function definition, but a complete code file that can be executed directly.
     """
 
+    requirements = '''As a developer, I want to implement file handling in Python to open, read, write, and close files (TCATBAL-FILE, XREF-FILE, DISCGRP-FILE, ACCOUNT-FILE, TRANSACT-FILE), so that data processing is seamless.
+
+                    As a developer, I want to compute monthly interest using the formula (TRAN-CAT-BAL * DIS-INT-RATE) / 1200, so that interest calculations are accurate and follow business rules.
+
+                    As a developer, I want to compute the total balance by adding TRAN-CAT-BAL and TRAN-INT-AMT, so that the final balance reflects both the category balance and interest. '''
+
+    # requirements = "Implement a code to add two numbers."
+
+    requirements = '''
+[
+  {
+    "epic_number": 1,
+    "epic_description": "File Initialization and Management",
+    "user_stories": [
+      {
+        "story_number": 1,
+        "story_name": "Open Required Files for Processing",
+        "story_description": "As a system, I need to open all required input and output files to ensure data is available for processing.",
+        "story_details": "Implement file handling in Python to open the following files: `TCATBAL-FILE`, `XREF-FILE`, `DISCGRP-FILE`, `ACCOUNT-FILE`, and `TRANSACT-FILE`. Ensure proper error handling for file operations.",
+        "story_type": "Technical",
+        "legacy_component": "File Initialization"
+      },
+      {
+        "story_number": 2,
+        "story_name": "Close All Files After Processing",
+        "story_description": "As a system, I need to close all opened files after processing to ensure data integrity and free up resources.",
+        "story_details": "Implement file closure logic in Python for all opened files: `TCATBAL-FILE`, `XREF-FILE`, `DISCGRP-FILE`, `ACCOUNT-FILE`, and `TRANSACT-FILE`. Handle errors during file closure gracefully.",
+        "story_type": "Technical",
+        "legacy_component": "File Closure"
+      }
+    ]
+  },
+  {
+    "epic_number": 2,
+    "epic_description": "Record Processing and Data Retrieval",
+    "user_stories": [
+      {
+        "story_number": 3,
+        "story_name": "Process Records from Transaction Category Balance File",
+        "story_description": "As a system, I need to loop through the `TCATBAL-FILE` and process each record to calculate interest and update accounts.",
+        "story_details": "Implement a loop in Python to read records from `TCATBAL-FILE`. Increment the record count and check if the account ID has changed since the last record. If changed, update the account with accumulated interest and reset the total interest.",
+        "story_type": "Functional",
+        "legacy_component": "Record Processing"
+      },
+      {
+        "story_number": 4,
+        "story_name": "Retrieve Account and Cross-Reference Data",
+        "story_description": "As a system, I need to fetch account and cross-reference data for each transaction to ensure accurate interest calculation.",
+        "story_details": "Fetch account data from `ACCOUNT-FILE` and cross-reference data from `XREF-FILE` using the account ID. Implement MongoDB queries to retrieve the required data.",
+        "story_type": "Functional",
+        "legacy_component": "Data Retrieval"
+      }
+    ]
+  },
+  {
+    "epic_number": 3,
+    "epic_description": "Interest Calculation and Account Updates",
+    "user_stories": [
+      {
+        "story_number": 5,
+        "story_name": "Calculate Monthly Interest",
+        "story_description": "As a system, I need to calculate monthly interest for each transaction to ensure accurate financial processing.",
+        "story_details": "Retrieve the interest rate from `DISCGRP-FILE` using the account group ID and transaction category. If not found, use a default group code to fetch the default interest rate. Compute the monthly interest using the formula `(Transaction Balance * Interest Rate) / 1200` and accumulate the calculated interest.",
+        "story_type": "Functional",
+        "legacy_component": "Interest Calculation"
+      },
+      {
+        "story_number": 6,
+        "story_name": "Update Account Balances",
+        "story_description": "As a system, I need to update account balances with the accumulated interest to reflect the latest financial data.",
+        "story_details": "Add the accumulated interest to the current account balance. Reset the current cycle credit and debit amounts. Update the account record in MongoDB.",
+        "story_type": "Functional",
+        "legacy_component": "Account Update"
+      }
+    ]
+  },
+  {
+    "epic_number": 4,
+    "epic_description": "Transaction Record Creation",
+    "user_stories": [
+      {
+        "story_number": 7,
+        "story_name": "Create Transaction Records for Calculated Interest",
+        "story_description": "As a system, I need to create transaction records for each calculated interest to maintain a record of financial activities.",
+        "story_details": "Generate a transaction record for each calculated interest. Populate transaction details such as description, amount, and timestamps. Write the transaction record to the `TRANSACT-FILE` using MongoDB.",
+        "story_type": "Functional",
+        "legacy_component": "Transaction Record Creation"
+      }
+    ]
+  },
+  {
+    "epic_number": 5,
+    "epic_description": "Error Handling and Logging",
+    "user_stories": [
+      {
+        "story_number": 8,
+        "story_name": "Implement Error Handling for File Operations",
+        "story_description": "As a system, I need to handle errors during file operations to ensure smooth processing and data integrity.",
+        "story_details": "Use Python's `try-except` blocks to handle errors during file opening, reading, writing, and closure. Log errors using Python's `logging` module.",
+        "story_type": "Technical",
+        "legacy_component": "Error Handling"
+      },
+      {
+        "story_number": 9,
+        "story_name": "Log Errors and Exceptions",
+        "story_description": "As a system, I need to log errors and exceptions in a structured format to facilitate debugging and monitoring.",
+        "story_details": "Implement structured logging using Python's `logging` module. Log errors with details such as timestamp, error type, and affected file or record.",
+        "story_type": "Technical",
+        "legacy_component": "Error Logging"
+      }
+    ]
+  }
+]
+    '''
+    
     for target_language in languages_to_test:
         print(f"\n{'='*50}")
         print(f"Testing with {target_language.value.upper()}")

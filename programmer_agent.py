@@ -2,6 +2,7 @@
 import openai
 from typing import Dict, Any, Optional
 from language_config import TargetLanguage, LanguageConfig
+import re
 
 class ProgrammerAgent:
     def __init__(self, api_key: str, endpoint: str, deployment: str, api_version: str, target_language: TargetLanguage):
@@ -24,18 +25,70 @@ class ProgrammerAgent:
         code_marker = self.lang_config["code_block_marker"]
 
         # Build a comprehensive prompt
-        prompt = f"""
-You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.
+#         prompt = f"""
+# You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.
 
-REQUIREMENTS:
-{requirements}
+# REQUIREMENTS:
+# {requirements}
 
-TESTS TO PASS:
-{tests}
+# TESTS TO PASS:
+# {tests}
 
-IMPORTANT: Use the exact same field names and data structures as shown in the tests.
-"""
+# IMPORTANT: Use the exact same field names and data structures as shown in the tests.
+# """
+        # Build a comprehensive prompt with language-specific instructions
+        if self.target_language == TargetLanguage.JAVA:
+            prompt = f"""
+        You are an expert Java programmer. Generate a complete, runnable Java program that satisfies the following requirements and passes all the provided tests.
 
+        REQUIREMENTS:
+        {requirements}
+
+        TESTS TO PASS:
+        {tests}
+
+        IMPORTANT JAVA REQUIREMENTS:
+        - The class name MUST be 'Generated_Java_Code'
+        - The code MUST be enclosed in a public class
+        - The class should contain a main method if necessary to run the code
+        - **Always include all necessary import statements at the top of the file**
+        - Use the exact same field names and data structures as shown in the tests
+        - Generate clean, well-documented implementation code
+        - Make sure the class name matches what the tests expect
+        ** Generated code should not contain any test cases. **
+        """
+        elif self.target_language == TargetLanguage.PYTHON:
+            prompt = f"""
+        You are an expert Python programmer. Generate Python code that satisfies the following requirements and passes all the provided tests.
+
+        REQUIREMENTS:
+        {requirements}
+
+        TESTS TO PASS:
+        {tests}
+
+        IMPORTANT: Use the exact same field names and data structures as shown in the tests.
+        - The class should contain a main method if necessary to run the code
+        - **Always include all necessary import statements at the top of the file**
+        - Use the exact same field names and data structures as shown in the tests
+        - Generate clean, well-documented implementation code
+        - Make sure the class name matches what the tests expect
+        ** Generated code should not contain any test cases. **
+        """
+        else:
+            prompt = f"""
+        You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.
+
+        REQUIREMENTS:
+        {requirements}
+
+        TESTS TO PASS:
+        {tests}
+
+        ** Generated code should not contain any test cases. **
+
+        IMPORTANT: Use the exact same field names and data structures as shown in the tests.
+        """
         # Add context from previous failed attempts
         if previous_attempts:
             prompt += "\n\nPREVIOUS FAILED ATTEMPTS:\n"
@@ -62,6 +115,7 @@ IMPORTANT: Use the exact same field names and data structures as shown in the te
         prompt += f"""
             Generate the {language_name} code wrapped in {code_marker} blocks.
             The code should be ready to run with the provided tests.
+            ** Generated code should not contain any test cases. **
             """
 
         try:
@@ -73,8 +127,13 @@ IMPORTANT: Use the exact same field names and data structures as shown in the te
             )
 
             content = response.choices[0].message.content
-            code = self._extract_code(content, code_marker)
 
+            print(f"\n--- LLM raw response for {self.target_language.value} ---\n{content}\n--- End of LLM response ---\n")
+            code = self._extract_code(content, code_marker)
+            # Save LLM response and extracted code to a Markdown file for debugging
+            with open(f"output_{self.target_language.value}.md", "a", encoding="utf-8") as f:
+                f.write(f"\n## LLM Response ({self.target_language.value})\n\n```\n{content}\n```\n")
+                f.write(f"\n## Extracted Code ({self.target_language.value})\n\n```\n{code}\n```\n")
             return {
                 "success": True,
                 "code": code,
@@ -131,3 +190,18 @@ IMPORTANT: Use the exact same field names and data structures as shown in the te
         else:
             code = content.strip()
         return code
+    
+    
+    def _extract_code(self, content: str, code_marker: str) -> str:
+        # Try to extract code between the specific code block marker and ```
+        pattern = re.compile(rf"{re.escape(code_marker)}\s*([\s\S]+?)\s*```", re.MULTILINE)
+        match = pattern.search(content)
+        if match:
+            return match.group(1).strip()
+        # Fallback: extract any code block
+        pattern = re.compile(r"```[\w]*\s*([\s\S]+?)\s*```", re.MULTILINE)
+        match = pattern.search(content)
+        if match:
+            return match.group(1).strip()
+        # Fallback: return the whole content
+        return content.strip()
