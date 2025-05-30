@@ -1,87 +1,182 @@
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.logging.*;
 
 public class Generated_Java_Code {
 
-    // Map to simulate file storage
-    private static final Map<String, String> fileStorage = new HashMap<>();
+    private static final Logger logger = Logger.getLogger(Generated_Java_Code.class.getName());
+    private static final Map<String, BufferedReader> openReaders = new HashMap<>();
+    private static final Map<String, BufferedWriter> openWriters = new HashMap<>();
 
-    /**
-     * Opens a file by its name.
-     * @param fileName The name of the file to open.
-     * @return A message indicating the file has been opened.
-     */
+    // Open a file for reading or writing
     public static String openFile(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "File opened: Invalid file name";
+        try {
+            if (fileName.equals("TRANSACT-FILE")) {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
+                openWriters.put(fileName, writer);
+            } else {
+                BufferedReader reader = new BufferedReader(new FileReader(fileName));
+                openReaders.put(fileName, reader);
+            }
+            return "File opened";
+        } catch (IOException e) {
+            logError("Error opening file: " + e.getMessage(), fileName);
+            return null;
         }
-        fileStorage.putIfAbsent(fileName, ""); // Initialize file if not already present
-        return "File opened: " + fileName;
     }
 
-    /**
-     * Reads the content of a file.
-     * @param fileName The name of the file to read.
-     * @return The content of the file.
-     */
-    public static String readFile(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "File content of: Invalid file name";
+    // Close a file
+    public static boolean closeFile(String fileName) {
+        try {
+            if (openReaders.containsKey(fileName)) {
+                openReaders.get(fileName).close();
+                openReaders.remove(fileName);
+            } else if (openWriters.containsKey(fileName)) {
+                openWriters.get(fileName).close();
+                openWriters.remove(fileName);
+            }
+            return true;
+        } catch (IOException e) {
+            logError("Error closing file: " + e.getMessage(), fileName);
+            return false;
         }
-        return "File content of: " + fileName + " -> " + fileStorage.getOrDefault(fileName, "");
     }
 
-    /**
-     * Writes content to a file.
-     * @param fileName The name of the file to write to.
-     * @param content The content to write to the file.
-     * @return A message indicating the content has been written to the file.
-     */
-    public static String writeFile(String fileName, String content) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "Written to file: Invalid file name";
+    // Process records from a file
+    public static boolean processRecords(String fileName) {
+        try {
+            BufferedReader reader = openReaders.get(fileName);
+            if (reader == null) {
+                throw new IllegalStateException("File not opened: " + fileName);
+            }
+
+            String line;
+            String lastAccountId = null;
+            double totalInterest = 0.0;
+
+            while ((line = reader.readLine()) != null) {
+                String[] fields = line.split(",");
+                String accountId = fields[0];
+                double transactionBalance = Double.parseDouble(fields[1]);
+                double interestRate = Double.parseDouble(fields[2]);
+
+                if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                    updateAccountBalance("ACCOUNT-FILE", lastAccountId, totalInterest);
+                    totalInterest = 0.0;
+                }
+
+                double interest = calculateInterest(transactionBalance, interestRate);
+                totalInterest += interest;
+                lastAccountId = accountId;
+            }
+
+            if (lastAccountId != null) {
+                updateAccountBalance("ACCOUNT-FILE", lastAccountId, totalInterest);
+            }
+
+            return true;
+        } catch (Exception e) {
+            logError("Error processing records: " + e.getMessage(), fileName);
+            return false;
         }
-        fileStorage.put(fileName, content);
-        return "Written to file: " + fileName;
     }
 
-    /**
-     * Closes a file by its name.
-     * @param fileName The name of the file to close.
-     * @return A message indicating the file has been closed.
-     */
-    public static String closeFile(String fileName) {
-        if (fileName == null || fileName.isEmpty()) {
-            return "File closed: Invalid file name";
+    // Retrieve account data
+    public static String retrieveAccountData(String fileName, String accountID) {
+        try {
+            BufferedReader reader = openReaders.get(fileName);
+            if (reader == null) {
+                throw new IllegalStateException("File not opened: " + fileName);
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith(accountID + ",")) {
+                    return line;
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            logError("Error retrieving account data: " + e.getMessage(), fileName);
+            return null;
         }
-        return "File closed: " + fileName;
     }
 
-    /**
-     * Computes the monthly interest using the formula:
-     * (TRAN-CAT-BAL * DIS-INT-RATE) / 1200
-     * @param tranCatBal The transaction category balance.
-     * @param disIntRate The discount interest rate.
-     * @return The computed monthly interest.
-     */
-    public static Double computeMonthlyInterest(double tranCatBal, double disIntRate) {
-        return (tranCatBal * disIntRate) / 1200;
+    // Retrieve cross-reference data
+    public static String retrieveXrefData(String fileName, String accountID) {
+        try {
+            BufferedReader reader = openReaders.get(fileName);
+            if (reader == null) {
+                throw new IllegalStateException("File not opened: " + fileName);
+            }
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith(accountID + ",")) {
+                    return line;
+                }
+            }
+            return null;
+        } catch (IOException e) {
+            logError("Error retrieving cross-reference data: " + e.getMessage(), fileName);
+            return null;
+        }
     }
 
-    /**
-     * Computes the total balance by adding TRAN-CAT-BAL and TRAN-INT-AMT.
-     * @param tranCatBal The transaction category balance.
-     * @param tranIntAmt The transaction interest amount.
-     * @return The computed total balance.
-     */
-    public static Double computeTotalBalance(double tranCatBal, double tranIntAmt) {
-        return tranCatBal + tranIntAmt;
+    // Calculate monthly interest
+    public static double calculateInterest(double balance, double rate) {
+        return (balance * rate) / 1200;
     }
 
-    public static void main(String[] args) {
-        // This main method is provided for manual execution if needed.
-        // The actual tests are defined in the RelaxedTests class.
-        System.out.println("Generated_Java_Code is ready to run with the provided tests.");
+    // Update account balance
+    public static boolean updateAccountBalance(String fileName, String accountID, double interest) {
+        try {
+            // Simulate updating account balance in a database or file
+            System.out.println("Updated account " + accountID + " with interest: " + interest);
+            return true;
+        } catch (Exception e) {
+            logError("Error updating account balance: " + e.getMessage(), fileName);
+            return false;
+        }
+    }
+
+    // Create a transaction record
+    public static boolean createTransactionRecord(String fileName, String description, double amount) {
+        try {
+            BufferedWriter writer = openWriters.get(fileName);
+            if (writer == null) {
+                throw new IllegalStateException("File not opened: " + fileName);
+            }
+
+            writer.write(description + "," + amount + "," + new Date().toString());
+            writer.newLine();
+            return true;
+        } catch (IOException e) {
+            logError("Error creating transaction record: " + e.getMessage(), fileName);
+            return false;
+        }
+    }
+
+    // Handle file errors
+    public static boolean handleFileError(String fileName) {
+        try {
+            // Simulate error handling logic
+            System.out.println("Handled error for file: " + fileName);
+            return true;
+        } catch (Exception e) {
+            logError("Error handling file error: " + e.getMessage(), fileName);
+            return false;
+        }
+    }
+
+    // Log errors
+    public static boolean logError(String errorMessage, String fileName) {
+        try {
+            logger.severe("Error in file " + fileName + ": " + errorMessage);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error logging error: " + e.getMessage());
+            return false;
+        }
     }
 }

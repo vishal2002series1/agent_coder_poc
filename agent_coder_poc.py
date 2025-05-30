@@ -32,6 +32,10 @@ class AgentCoderPOC:
         self.max_iterations = 5
         self.results_log = []
 
+        # Initialize retry-related attributes
+        self._retry_previous_code = False
+        self._previous_code = None
+
     def generate_and_test_code(self, requirements):
         language_name = self.target_language.value.title()
         print(f"🚀 Starting AgentCoder POC for {language_name}: {requirements[:100]}...")
@@ -53,16 +57,25 @@ class AgentCoderPOC:
         }
 
         for iteration in range(1, self.max_iterations + 1):
-            print(f"\n🔄 Iteration {iteration}: Generating {language_name} code...")
+            # Check if we should retry the previous code (after dependency installation)
+            if iteration > 1 and hasattr(self, '_retry_previous_code') and self._retry_previous_code:
+                print(f"\n🔄 Iteration {iteration}: Retrying previous {language_name} code after dependency installation...")
+                code = self._previous_code
+                self._retry_previous_code = False  # Reset retry flag
+            else:
+                print(f"\n🔄 Iteration {iteration}: Generating {language_name} code...")
 
-            # Pass comprehensive context to code generator
-            code_result = self.programmer.generate_code_with_context(context)
-            if not code_result["success"]:
-                print(f"❌ {language_name} code generation failed: {code_result['error']}")
-                continue
-            code = code_result["code"]
-            print(f"--- Extracted code for {self.target_language.value} ---\n{code}\n--- End of code ---")
-            print(f"✅ {language_name} code generated")
+                # Pass comprehensive context to code generator
+                code_result = self.programmer.generate_code_with_context(context)
+                if not code_result["success"]:
+                    print(f"❌ {language_name} code generation failed: {code_result['error']}")
+                    continue
+                code = code_result["code"]
+                print(f"--- Extracted code for {self.target_language.value} ---\n{code}\n--- End of code ---")
+                print(f"✅ {language_name} code generated")
+
+                # Store the code for potential retry
+                self._previous_code = code
 
             # Execute code with tests
             print(f"🧪 Testing {language_name} code...")
@@ -81,6 +94,11 @@ class AgentCoderPOC:
 
             if execution_result["success"]:
                 print(f"🎉 Success! {language_name} code passed all tests in iteration {iteration}")
+                # Clean up retry flags
+                if hasattr(self, '_retry_previous_code'):
+                    delattr(self, '_retry_previous_code')
+                if hasattr(self, '_previous_code'):
+                    delattr(self, '_previous_code')
                 return {
                     "success": True,
                     "language": self.target_language.value,
@@ -93,20 +111,39 @@ class AgentCoderPOC:
             else:
                 error_stage = execution_result.get("stage", "unknown")
                 error_type = execution_result.get("error_type", "unknown")
+                error_message = execution_result.get("error", "")
+
                 print(f"❌ {error_stage.title()} failed ({error_type})")
-                print(f"📋 Error: {execution_result['error'][:200]}...")
+                print(f"📋 Error: {error_message[:200]}...")
 
-                # Update context with this failed attempt
-                context["previous_attempts"].append({
-                    "iteration": iteration,
-                    "code": code,
-                    "error": execution_result["error"],
-                    "error_type": error_type,
-                    "error_stage": error_stage,
-                    "feedback": execution_result.get("feedback", "")
-                })
+                # Check if this is a dependency-related error that might have been resolved
+                is_dependency_error = self._is_dependency_error(error_type, error_message)
+                was_retry_attempt = hasattr(self, '_retry_previous_code') and not self._retry_previous_code
 
-                context["iteration_history"].append(iteration_log)
+                if is_dependency_error and not was_retry_attempt:
+                    # This is a dependency error and we haven't retried yet
+                    print(f"🔧 Dependency error detected. Will retry the same code in next iteration after dependency installation.")
+                    self._retry_previous_code = True
+
+                    # Don't add this to previous_attempts yet - we'll retry first
+                    context["iteration_history"].append(iteration_log)
+                else:
+                    # Either not a dependency error, or retry failed - generate new code next time
+                    print(f"🔄 Will generate new code in next iteration.")
+                    if hasattr(self, '_retry_previous_code'):
+                        self._retry_previous_code = False
+
+                    # Update context with this failed attempt
+                    context["previous_attempts"].append({
+                        "iteration": iteration,
+                        "code": code,
+                        "error": error_message,
+                        "error_type": error_type,
+                        "error_stage": error_stage,
+                        "feedback": execution_result.get("feedback", "")
+                    })
+
+                    context["iteration_history"].append(iteration_log)
 
         print(f"\n💥 Failed to generate working {language_name} code after {self.max_iterations} iterations")
         return {
@@ -129,6 +166,31 @@ class AgentCoderPOC:
 
     def cleanup(self):
         self.test_executor.cleanup()
+        
+    def _is_dependency_error(self, error_type: str, error_message: str) -> bool:
+            """
+            Determine if an error is likely due to missing dependencies that might have been installed.
+            """
+            dependency_error_indicators = [
+                "ModuleNotFoundError",
+                "ImportError",
+                "No module named",
+                "cannot import name",
+                "package not found"
+            ]
+
+            # Check error type
+            if error_type in ["ImportError", "ModuleNotFoundError"]:
+                return True
+
+            # Check error message for dependency-related keywords
+            error_lower = error_message.lower()
+            for indicator in dependency_error_indicators:
+                if indicator.lower() in error_lower:
+                    return True
+
+            return False
+
 
 def main():
     load_dotenv()
@@ -320,6 +382,7 @@ def main():
                 print(f"   📋 Last error: {results.get('last_execution_result', {}).get('error_type', 'Unknown')}")
         finally:
             agent_coder.cleanup()
+
 
 if __name__ == "__main__":
     main()
