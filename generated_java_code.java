@@ -4,179 +4,181 @@ import java.util.logging.*;
 
 public class Generated_Java_Code {
 
+    // Logger for error handling and logging
     private static final Logger logger = Logger.getLogger(Generated_Java_Code.class.getName());
-    private static final Map<String, BufferedReader> openReaders = new HashMap<>();
-    private static final Map<String, BufferedWriter> openWriters = new HashMap<>();
 
-    // Open a file for reading or writing
-    public static String openFile(String fileName) {
+    // File names
+    private static final String TCATBAL_FILE = "TCATBAL-FILE";
+    private static final String XREF_FILE = "XREF-FILE";
+    private static final String DISCGRP_FILE = "DISCGRP-FILE";
+    private static final String ACCOUNT_FILE = "ACCOUNT-FILE";
+    private static final String TRANSACT_FILE = "TRANSACT-FILE";
+
+    // File handles
+    private BufferedReader tcatbalReader;
+    private BufferedReader xrefReader;
+    private BufferedReader discgrpReader;
+    private BufferedReader accountReader;
+    private BufferedWriter transactWriter;
+
+    // Data structures for processing
+    private Map<String, String> accountData = new HashMap<>();
+    private Map<String, String> xrefData = new HashMap<>();
+    private Map<String, Double> interestRates = new HashMap<>();
+
+    // Open all required files
+    public void openFiles() {
         try {
-            if (fileName.equals("TRANSACT-FILE")) {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true));
-                openWriters.put(fileName, writer);
-            } else {
-                BufferedReader reader = new BufferedReader(new FileReader(fileName));
-                openReaders.put(fileName, reader);
-            }
-            return "File opened";
+            tcatbalReader = new BufferedReader(new FileReader(TCATBAL_FILE));
+            xrefReader = new BufferedReader(new FileReader(XREF_FILE));
+            discgrpReader = new BufferedReader(new FileReader(DISCGRP_FILE));
+            accountReader = new BufferedReader(new FileReader(ACCOUNT_FILE));
+            transactWriter = new BufferedWriter(new FileWriter(TRANSACT_FILE, true));
         } catch (IOException e) {
-            logError("Error opening file: " + e.getMessage(), fileName);
-            return null;
+            logger.severe("Error opening files: " + e.getMessage());
+            throw new RuntimeException("Failed to open files", e);
         }
     }
 
-    // Close a file
-    public static boolean closeFile(String fileName) {
+    // Close all opened files
+    public void closeFiles() {
         try {
-            if (openReaders.containsKey(fileName)) {
-                openReaders.get(fileName).close();
-                openReaders.remove(fileName);
-            } else if (openWriters.containsKey(fileName)) {
-                openWriters.get(fileName).close();
-                openWriters.remove(fileName);
-            }
-            return true;
+            if (tcatbalReader != null) tcatbalReader.close();
+            if (xrefReader != null) xrefReader.close();
+            if (discgrpReader != null) discgrpReader.close();
+            if (accountReader != null) accountReader.close();
+            if (transactWriter != null) transactWriter.close();
         } catch (IOException e) {
-            logError("Error closing file: " + e.getMessage(), fileName);
-            return false;
+            logger.severe("Error closing files: " + e.getMessage());
         }
     }
 
-    // Process records from a file
-    public static boolean processRecords(String fileName) {
+    // Process records from TCATBAL-FILE
+    public void processRecords() {
         try {
-            BufferedReader reader = openReaders.get(fileName);
-            if (reader == null) {
-                throw new IllegalStateException("File not opened: " + fileName);
-            }
-
             String line;
-            String lastAccountId = null;
-            double totalInterest = 0.0;
+            int recordCount = 0;
+            String previousAccountId = null;
+            double accumulatedInterest = 0.0;
 
-            while ((line = reader.readLine()) != null) {
+            while ((line = tcatbalReader.readLine()) != null) {
+                recordCount++;
                 String[] fields = line.split(",");
                 String accountId = fields[0];
                 double transactionBalance = Double.parseDouble(fields[1]);
-                double interestRate = Double.parseDouble(fields[2]);
+                String transactionCategory = fields[2];
 
-                if (lastAccountId != null && !lastAccountId.equals(accountId)) {
-                    updateAccountBalance("ACCOUNT-FILE", lastAccountId, totalInterest);
-                    totalInterest = 0.0;
+                if (!accountId.equals(previousAccountId) && previousAccountId != null) {
+                    updateAccount(previousAccountId, accumulatedInterest);
+                    accumulatedInterest = 0.0;
                 }
 
-                double interest = calculateInterest(transactionBalance, interestRate);
-                totalInterest += interest;
-                lastAccountId = accountId;
+                double interestRate = getInterestRate(accountId, transactionCategory);
+                double monthlyInterest = (transactionBalance * interestRate) / 1200;
+                accumulatedInterest += monthlyInterest;
+
+                previousAccountId = accountId;
             }
 
-            if (lastAccountId != null) {
-                updateAccountBalance("ACCOUNT-FILE", lastAccountId, totalInterest);
+            if (previousAccountId != null) {
+                updateAccount(previousAccountId, accumulatedInterest);
             }
 
-            return true;
-        } catch (Exception e) {
-            logError("Error processing records: " + e.getMessage(), fileName);
-            return false;
+        } catch (IOException e) {
+            logger.severe("Error processing records: " + e.getMessage());
         }
     }
 
-    // Retrieve account data
-    public static String retrieveAccountData(String fileName, String accountID) {
+    // Retrieve account and cross-reference data
+    public void retrieveData() {
         try {
-            BufferedReader reader = openReaders.get(fileName);
-            if (reader == null) {
-                throw new IllegalStateException("File not opened: " + fileName);
+            String line;
+
+            while ((line = accountReader.readLine()) != null) {
+                String[] fields = line.split(",");
+                accountData.put(fields[0], line); // Account ID as key
+            }
+
+            while ((line = xrefReader.readLine()) != null) {
+                String[] fields = line.split(",");
+                xrefData.put(fields[0], line); // Cross-reference ID as key
+            }
+
+        } catch (IOException e) {
+            logger.severe("Error retrieving data: " + e.getMessage());
+        }
+    }
+
+    // Calculate interest rate from DISCGRP-FILE
+    private double getInterestRate(String accountId, String transactionCategory) {
+        try {
+            String accountGroupId = xrefData.get(accountId).split(",")[1];
+            String key = accountGroupId + "-" + transactionCategory;
+
+            if (interestRates.containsKey(key)) {
+                return interestRates.get(key);
             }
 
             String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(accountID + ",")) {
-                    return line;
+            while ((line = discgrpReader.readLine()) != null) {
+                String[] fields = line.split(",");
+                String groupKey = fields[0] + "-" + fields[1];
+                double rate = Double.parseDouble(fields[2]);
+                interestRates.put(groupKey, rate);
+
+                if (groupKey.equals(key)) {
+                    return rate;
                 }
             }
-            return null;
+
         } catch (IOException e) {
-            logError("Error retrieving account data: " + e.getMessage(), fileName);
-            return null;
+            logger.severe("Error retrieving interest rate: " + e.getMessage());
+        }
+
+        return 0.0; // Default interest rate
+    }
+
+    // Update account balances
+    private void updateAccount(String accountId, double accumulatedInterest) {
+        try {
+            String accountRecord = accountData.get(accountId);
+            String[] fields = accountRecord.split(",");
+            double currentBalance = Double.parseDouble(fields[2]);
+            double updatedBalance = currentBalance + accumulatedInterest;
+
+            // Update account record
+            fields[2] = String.valueOf(updatedBalance);
+            accountData.put(accountId, String.join(",", fields));
+
+            // Write transaction record
+            createTransactionRecord(accountId, accumulatedInterest);
+
+        } catch (Exception e) {
+            logger.severe("Error updating account: " + e.getMessage());
         }
     }
 
-    // Retrieve cross-reference data
-    public static String retrieveXrefData(String fileName, String accountID) {
+    // Create transaction record
+    private void createTransactionRecord(String accountId, double amount) {
         try {
-            BufferedReader reader = openReaders.get(fileName);
-            if (reader == null) {
-                throw new IllegalStateException("File not opened: " + fileName);
-            }
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith(accountID + ",")) {
-                    return line;
-                }
-            }
-            return null;
+            String transactionRecord = accountId + "," + amount + "," + new Date().toString();
+            transactWriter.write(transactionRecord);
+            transactWriter.newLine();
         } catch (IOException e) {
-            logError("Error retrieving cross-reference data: " + e.getMessage(), fileName);
-            return null;
+            logger.severe("Error creating transaction record: " + e.getMessage());
         }
     }
 
-    // Calculate monthly interest
-    public static double calculateInterest(double balance, double rate) {
-        return (balance * rate) / 1200;
-    }
+    // Main method to execute the program
+    public static void main(String[] args) {
+        Generated_Java_Code program = new Generated_Java_Code();
 
-    // Update account balance
-    public static boolean updateAccountBalance(String fileName, String accountID, double interest) {
         try {
-            // Simulate updating account balance in a database or file
-            System.out.println("Updated account " + accountID + " with interest: " + interest);
-            return true;
-        } catch (Exception e) {
-            logError("Error updating account balance: " + e.getMessage(), fileName);
-            return false;
-        }
-    }
-
-    // Create a transaction record
-    public static boolean createTransactionRecord(String fileName, String description, double amount) {
-        try {
-            BufferedWriter writer = openWriters.get(fileName);
-            if (writer == null) {
-                throw new IllegalStateException("File not opened: " + fileName);
-            }
-
-            writer.write(description + "," + amount + "," + new Date().toString());
-            writer.newLine();
-            return true;
-        } catch (IOException e) {
-            logError("Error creating transaction record: " + e.getMessage(), fileName);
-            return false;
-        }
-    }
-
-    // Handle file errors
-    public static boolean handleFileError(String fileName) {
-        try {
-            // Simulate error handling logic
-            System.out.println("Handled error for file: " + fileName);
-            return true;
-        } catch (Exception e) {
-            logError("Error handling file error: " + e.getMessage(), fileName);
-            return false;
-        }
-    }
-
-    // Log errors
-    public static boolean logError(String errorMessage, String fileName) {
-        try {
-            logger.severe("Error in file " + fileName + ": " + errorMessage);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Error logging error: " + e.getMessage());
-            return false;
+            program.openFiles();
+            program.retrieveData();
+            program.processRecords();
+        } finally {
+            program.closeFiles();
         }
     }
 }

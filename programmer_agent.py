@@ -56,7 +56,10 @@ class ProgrammerAgent:
         - Generate clean, well-documented implementation code
         - Make sure the class name matches what the tests expect
         ** Generated code should not contain any test cases. **
-        """
+        ** Do not use external libraries even if requirements suggest it. **   
+        ** Strinctly use system libraries only. ** 
+          
+              """
         elif self.target_language == TargetLanguage.PYTHON:
             prompt = f"""
         You are an expert Python programmer. Generate Python code that satisfies the following requirements and passes all the provided tests.
@@ -128,7 +131,7 @@ class ProgrammerAgent:
 
             content = response.choices[0].message.content
 
-            print(f"\n--- LLM raw response for {self.target_language.value} ---\n{content}\n--- End of LLM response ---\n")
+            # print(f"\n--- LLM raw response for {self.target_language.value} ---\n{content}\n--- End of LLM response ---\n")
             code = self._extract_code(content, code_marker)
             # Save LLM response and extracted code to a Markdown file for debugging
             with open(f"output_{self.target_language.value}.md", "a", encoding="utf-8") as f:

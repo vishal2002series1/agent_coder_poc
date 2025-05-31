@@ -1,1 +1,4 @@
 2025-05-30 17:54:16,243 - ERROR - Error opening file TCATBAL-FILE: [Errno 2] No such file or directory: 'TCATBAL-FILE'
+2025-05-31 00:36:35,808 - ERROR - Error opening file XREF-FILE: [Errno 2] No such file or directory: 'XREF-FILE'
+2025-05-31 00:36:47,572 - ERROR - File not found: XREF-FILE
+2025-05-31 00:36:47,572 - ERROR - Error during file opening: File not found: XREF-FILE

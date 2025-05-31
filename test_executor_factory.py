@@ -7,6 +7,8 @@ import os
 import sys
 from language_config import TargetLanguage, LanguageConfig
 import re
+import requests
+from bs4 import BeautifulSoup  # Import BeautifulSoup
 
 def extract_public_class_name(java_code: str) -> str:
     match = re.search(r'public\s+class\s+(\w+)', java_code)
@@ -79,12 +81,18 @@ print("All tests passed successfully!")
             with open(temp_file, 'w') as f:
                 f.write(code)
 
+            # result = subprocess.run(
+            #     self.lang_config["execution_command"] + [temp_file],
+            #     capture_output=True,
+            #     text=True,
+            #     timeout=self.lang_config["timeout"]
+            # )
             result = subprocess.run(
-                self.lang_config["execution_command"] + [temp_file],
-                capture_output=True,
-                text=True,
-                timeout=self.lang_config["timeout"]
-            )
+            [sys.executable, temp_file],  # Use sys.executable instead of lang_config
+            capture_output=True,
+            text=True,
+            timeout=self.lang_config["timeout"]
+                )
 
             if result.returncode == 0:
                 return {
@@ -254,6 +262,28 @@ class JavaTestExecutor(BaseTestExecutor):
     def __init__(self, target_language: TargetLanguage):
         super().__init__(target_language)
         self.classpath = ""  # Initialize empty classpath
+
+    def _detect_java_dependencies(self, error_message: str) -> list:
+        """
+        Detect missing Java dependencies from compilation errors.
+        """
+        missing_deps = []
+
+        # Common patterns for missing Java dependencies
+        patterns = [
+            r"package ([\w\.]+) does not exist",
+            r"cannot find symbol.*class (\w+)",
+            r"error: package ([\w\.]+) does not exist",
+            r"cannot find symbol.*symbol:\s*class\s*(\w+)"
+        ]
+
+        for pattern in patterns:
+            matches = re.findall(pattern, error_message)
+            missing_deps.extend(matches)
+
+        return list(set(missing_deps))  # Remove duplicates
+
+
     # def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
     #     # Create a proper Java structure
     #     self.install_dependencies(code)
@@ -497,28 +527,150 @@ class JavaTestExecutor(BaseTestExecutor):
     #         for pkg in to_install:
     #             print(f"  - {pkg}")
     #         print("Automatic Java dependency installation is not implemented. Please add these to your pom.xml or build.gradle if needed.")
+    # def install_dependencies(self, code: str):
+    #     """Install Java dependencies using Maven if needed"""
+    #     # Find all import statements
+    #     imports = re.findall(r'^\s*import ([\w\.]+);', code, re.MULTILINE)
+
+    #     # List of standard Java packages (partial, can be expanded)
+    #     std_libs = {'java.util', 'java.io', 'java.time', 'java.lang', 'java.math', 'java.net', 'java.nio', 'java.text'}
+
+    #     # Filter out standard libraries
+    #     external_imports = [pkg for pkg in set(imports) if not any(pkg.startswith(std) for std in std_libs)]
+
+    #     if external_imports:
+    #         print(f"Found external Java dependencies: {external_imports}")
+
+    #         # Check for common testing frameworks and install them
+    #         for pkg in external_imports:
+    #             if 'junit' in pkg.lower():
+    #                 self._install_junit()
+    #             elif 'testng' in pkg.lower():
+    #                 self._install_testng()
+    #             else:
+    #                 print(f"WARNING: Unknown Java package '{pkg}' - manual installation may be required")
     def install_dependencies(self, code: str):
-        """Install Java dependencies using Maven if needed"""
-        # Find all import statements
-        imports = re.findall(r'^\s*import ([\w\.]+);', code, re.MULTILINE)
+        """
+        Dynamically extract and install Java dependencies.
+        """
+        # 1. Extract import statements
+        imports = re.findall(r'^\s*import\s+([\w\.]+);', code, re.MULTILINE)
 
-        # List of standard Java packages (partial, can be expanded)
+        # 2. Filter out standard Java libraries
         std_libs = {'java.util', 'java.io', 'java.time', 'java.lang', 'java.math', 'java.net', 'java.nio', 'java.text'}
-
-        # Filter out standard libraries
         external_imports = [pkg for pkg in set(imports) if not any(pkg.startswith(std) for std in std_libs)]
 
-        if external_imports:
-            print(f"Found external Java dependencies: {external_imports}")
+        print(f"Detected external Java dependencies: {external_imports}")
 
-            # Check for common testing frameworks and install them
-            for pkg in external_imports:
-                if 'junit' in pkg.lower():
-                    self._install_junit()
-                elif 'testng' in pkg.lower():
-                    self._install_testng()
-                else:
-                    print(f"WARNING: Unknown Java package '{pkg}' - manual installation may be required")
+        # 3. Attempt to resolve and install dependencies
+        for package in external_imports:
+            self._resolve_and_install_dependency(package)
+
+    def install_dependencies(self, code: str):
+        """
+        Dynamically extract and install Java dependencies.
+        """
+        # 1. Extract import statements
+        imports = re.findall(r'^\s*import\s+([\w\.]+);', code, re.MULTILINE)
+
+        # 2. Filter out standard Java libraries
+        std_libs = {'java.util', 'java.io', 'java.time', 'java.lang', 'java.math', 'java.net', 'java.nio', 'java.text'}
+        external_imports = [pkg for pkg in set(imports) if not any(pkg.startswith(std) for std in std_libs)]
+
+        print(f"Detected external Java dependencies: {external_imports}")
+
+        # 3. Attempt to resolve and install dependencies
+        for package in external_imports:
+            self._resolve_and_install_dependency(package)
+
+
+    def _resolve_and_install_dependency(self, package: str):
+        """
+        Attempt to resolve a Java package to a Maven artifact and install it.
+        """
+        artifact = self._search_maven_central(package)
+
+        if artifact:
+            print(f"Found Maven artifact: {artifact}")
+            jar_path = self._download_jar(artifact)
+            if jar_path:
+                print(f"Downloaded JAR: {jar_path}")
+                self._update_classpath(jar_path)
+            else:
+                print(f"Failed to download JAR for {package}")
+        else:
+            print(f"Could not find Maven artifact for package: {package}")
+
+    def _search_maven_central(self, package: str) -> dict:
+        """
+        Search Maven Central for a given Java package and return the artifact information.
+        """
+        # Construct the search URL
+        search_url = f"https://search.maven.org/search?q=fc:%22{package}%22&core=gav"
+
+        try:
+            # Send the request
+            response = requests.get(search_url)
+            response.raise_for_status()
+
+            # Parse the response
+            soup = BeautifulSoup(response.content, 'html.parser')
+            results = soup.find_all('doc')
+
+            if results:
+                # Extract the artifact information from the first result
+                doc = results[0]
+                group_id = doc.find('str', {'name': 'g'}).text
+                artifact_id = doc.find('str', {'name': 'a'}).text
+                version = doc.find('str', {'name': 'v'}).text
+
+                return {
+                    'groupId': group_id,
+                    'artifactId': artifact_id,
+                    'version': version
+                }
+            else:
+                return None
+
+        except Exception as e:
+            print(f"Error searching Maven Central: {e}")
+            return None
+        
+    
+
+    def _download_jar(self, artifact: dict) -> str:
+        """
+        Download JAR file from Maven Central.
+        """
+        group_path = artifact['groupId'].replace('.', '/')
+        jar_name = f"{artifact['artifactId']}-{artifact['version']}.jar"
+        url = f"https://repo1.maven.org/maven2/{group_path}/{artifact['artifactId']}/{artifact['version']}/{jar_name}"
+        lib_dir = os.path.join(self.temp_dir, 'lib')
+        os.makedirs(lib_dir, exist_ok=True)
+        jar_path = os.path.join(lib_dir, jar_name)
+
+        try:
+            import requests
+            response = requests.get(url)
+            response.raise_for_status()
+
+            with open(jar_path, 'wb') as f:
+                f.write(response.content)
+
+            return jar_path
+
+        except Exception as e:
+            print(f"Error downloading JAR: {e}")
+            return None
+        
+    def _update_classpath(self, jar_path: str):
+        """
+        Update the classpath with the given JAR path.
+        """
+        if not hasattr(self, 'classpath') or not self.classpath:
+            self.classpath = jar_path
+        else:
+            self.classpath += os.pathsep + jar_path
 
     def _install_junit(self):
         """Install JUnit using Maven"""
