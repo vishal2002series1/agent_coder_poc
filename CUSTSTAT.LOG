@@ -31,3 +31,31 @@ Critical error: [Errno 2] No such file or directory: 'CUSTOMER_MASTER_FILE.csv'
 2025-06-01 10:42:48,120 - Critical Error: Invalid data format
 2025-06-02 07:59:31,714 - Customer ID: 1, Old Status: Active, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
 2025-06-02 11:38:25,826 - Audit log generated
+2025-06-03 00:08:33,263 - Customer ID: 1, Old Status: Active, New Status: Suspended, Reason: No payment for 90 days
+2025-06-03 00:08:33,263 - Customer ID: 2, Old Status: Delinquent, New Status: Active, Reason: Payment received, balance cleared
+2025-06-03 00:08:33,263 - Critical Error: File access error
+2025-06-03 00:08:33,263 - ALERT: File access error - Operations team notified.
+2025-06-03 00:08:33,263 - Critical Error: 
+2025-06-03 00:08:33,263 - ALERT:  - Operations team notified.
+2025-06-03 00:08:33,264 - Customer ID: 1, Old Status: Active, New Status: Suspended, Reason: No payment for 90 days
+2025-06-03 00:08:33,264 - Customer ID: 2, Old Status: Delinquent, New Status: Active, Reason: Payment received, balance cleared
+2025-06-03 00:08:33,264 - Critical Error: Invalid data format
+2025-06-03 00:08:33,264 - ALERT: Invalid data format - Operations team notified.
+2025-06-03 00:14:59,435 - Customer ID: 1, Old Status: Active, New Status: Delinquent, Reason: Balance overdue > 60 days
+2025-06-03 00:14:59,435 - Customer ID: 2, Old Status: Suspended, New Status: Deactivated, Reason: Suspended for 180 days
+2025-06-03 00:14:59,435 - Critical Error: File access error
+2025-06-03 00:14:59,435 - ALERT: File access error - Operations team notified.
+2025-06-03 00:14:59,435 - Critical Error: 
+2025-06-03 00:14:59,435 - ALERT:  - Operations team notified.
+2025-06-03 00:14:59,436 - Customer ID: 1, Old Status: Active, New Status: Delinquent, Reason: Balance overdue > 60 days
+2025-06-03 00:14:59,436 - Customer ID: 2, Old Status: Suspended, New Status: Deactivated, Reason: Suspended for 180 days
+2025-06-03 00:14:59,436 - Critical Error: Invalid data format
+2025-06-03 00:14:59,436 - ALERT: Invalid data format - Operations team notified.
+2025-06-03 00:22:18,042 - Customer ID: 1, Old Status: Unknown, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-03 00:22:18,042 - Customer ID: 1, Old Status: Delinquent, New Status: Active, Reason: Payment received
+2025-06-03 00:22:18,043 - Critical Error - Type: File Access Error, Message: Unable to read CUSTOMER_MASTER_FILE
+2025-06-03 00:22:18,043 - Customer ID: 1, Old Status: Unknown, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-03 00:22:18,043 - Critical Error - Type: Unknown, Message: No details provided
+2025-06-03 00:22:18,043 - Customer ID: 1, Old Status: Unknown, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-03 00:22:18,043 - Customer ID: 1, Old Status: Unknown, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-03 00:22:18,043 - Customer ID: 1, Old Status: Delinquent, New Status: Active, Reason: Payment received

@@ -48,16 +48,15 @@ class ProgrammerAgent:
         {tests}
 
         IMPORTANT JAVA REQUIREMENTS:
-        - The class name MUST be 'Generated_Java_Code'
-        - The code MUST be enclosed in a public class
-        - The class should contain a main method if necessary to run the code
-        - **Always include all necessary import statements at the top of the file**
-        - Use the exact same field names and data structures as shown in the tests
-        - Generate clean, well-documented implementation code
-        - Make sure the class name matches what the tests expect
+        - Your *main implementation class* should be named 'Solution' (or a name highly relevant to the primary requirement, e.g., 'CustomerAccountProcessor' for the current requirement). Use 'Solution' as a default if no obvious domain name is present.
+        - The code MUST be enclosed in a public class.
+        - If the requirements describe a core process or a single main operation, ensure it's encapsulated in a public static method (e.g., `public static void main(String[] args)` if it's an executable program, or `public static ReturnType methodName(Parameters)` if it's a utility function expected by tests).
+        - **Always include all necessary import statements at the top of the file.**
+        - Use the exact same field names and data structures as shown in the tests.
+        - Generate clean, well-documented implementation code.
+        - Ensure the class name and method signatures you define are consistent with how the tests would invoke them.
         ** Generated code should not contain any test cases. **
-        ** Do not use external libraries even if requirements suggest it. **   
-        ** Strinctly use system libraries only. ** 
+        ** Use dependencies supported by Maven Central only. Do not use any other libraries or frameworks. **
 
           
               """

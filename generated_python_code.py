@@ -1,85 +1,140 @@
-import datetime
 import logging
+from pymongo import MongoClient
+import requests
 
-# Configure logging for the audit log
-logging.basicConfig(filename='CUSTSTAT.LOG', level=logging.INFO, 
-                    format='%(asctime)s - %(message)s')
+# Configure logging
+logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class CustomerAccountStatusUpdater:
+class FinancialProcessingSystem:
     def __init__(self):
-        self.current_date = datetime.datetime.now()
+        self.files = {}
+        self.mongo_client = MongoClient("mongodb://localhost:27017/")
+        self.db = self.mongo_client["financial_db"]
 
-    def nightly_batch_process(self):
-        """
-        Simulates the nightly batch process that updates customer account statuses.
-        """
+    def open_file(self, file_name):
         try:
-            # Simulate the COBOL program processing
-            self.process_customer_accounts()
-            return "Batch process completed"
+            file_obj = open(file_name, 'w')
+            self.files[file_name] = file_obj
+            return file_obj
         except Exception as e:
-            self.handle_critical_error(f"Critical error during batch process: {e}")
-            return None
+            logging.error(f"Error opening file {file_name}: {e}")
+            raise
 
-    def process_customer_accounts(self):
-        """
-        Processes customer accounts and updates their statuses based on the rules.
-        """
-        # Simulated customer data
-        customer_data_list = [
-            {"CUSTOMER_ID": 1, "CUSTOMER_ACCOUNT_STATUS": "Active", 
-             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=20), 
-             "OUTSTANDING_BALANCE_DAYS": 0},
-            {"CUSTOMER_ID": 2, "CUSTOMER_ACCOUNT_STATUS": "Active", 
-             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=70), 
-             "OUTSTANDING_BALANCE_DAYS": 75},
-            {"CUSTOMER_ID": 3, "CUSTOMER_ACCOUNT_STATUS": "Delinquent", 
-             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=100), 
-             "OUTSTANDING_BALANCE_DAYS": 95},
-            {"CUSTOMER_ID": 4, "CUSTOMER_ACCOUNT_STATUS": "Suspended", 
-             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=200), 
-             "OUTSTANDING_BALANCE_DAYS": 0},
-        ]
+    def close_file(self, file_obj):
+        try:
+            file_obj.close()
+        except Exception as e:
+            logging.error(f"Error closing file: {e}")
+            raise
 
-        for customer_data in customer_data_list:
-            old_status = customer_data["CUSTOMER_ACCOUNT_STATUS"]
-            new_status, reason = self.determine_new_status(customer_data)
-            if old_status != new_status:
-                customer_data["CUSTOMER_ACCOUNT_STATUS"] = new_status
-                self.generate_audit_log(customer_data, old_status, new_status, reason)
+    def process_records(self, file_name):
+        try:
+            with open(file_name, 'r') as file:
+                record_count = 0
+                previous_account_id = None
+                total_interest = 0
 
-    def determine_new_status(self, customer_data):
-        """
-        Determines the new status for a customer based on their payment history and balance.
-        """
-        last_payment_date = customer_data.get("LAST_PAYMENT_DATE")
-        outstanding_balance_days = customer_data.get("OUTSTANDING_BALANCE_DAYS")
-        days_since_last_payment = (self.current_date - last_payment_date).days if last_payment_date else float('inf')
+                for line in file:
+                    record_count += 1
+                    record = line.strip().split(",")  # Assuming CSV format
+                    account_id = record[0]
+                    balance = float(record[1])
+                    group_id = record[2]
 
-        if days_since_last_payment <= 30 and outstanding_balance_days <= 60:
-            return "Active", "Payment received, balance cleared"
-        elif 60 < outstanding_balance_days < 90:
-            return "Delinquent", "Balance overdue > 60 days"
-        elif outstanding_balance_days >= 90 or days_since_last_payment >= 90:
-            return "Suspended", "Balance overdue > 90 days or no payment for 90 days"
-        elif customer_data["CUSTOMER_ACCOUNT_STATUS"] == "Suspended" and days_since_last_payment >= 180:
-            return "Deactivated", "Account suspended for 180 days without payment"
-        return customer_data["CUSTOMER_ACCOUNT_STATUS"], "No status change"
+                    if account_id != previous_account_id and previous_account_id is not None:
+                        self.update_account_balance(previous_account_id, total_interest)
+                        total_interest = 0
 
-    def generate_audit_log(self, customer_data, old_status, new_status, reason):
-        """
-        Generates an audit log entry for a status change.
-        """
-        log_message = (f"Customer ID: {customer_data['CUSTOMER_ID']}, "
-                       f"Status changed from {old_status} to {new_status}, Reason: {reason}")
-        logging.info(log_message)
-        return "Audit log generated"
+                    interest_rate = self.fetch_interest_rate(group_id)
+                    interest = self.calculate_interest(balance, interest_rate)
+                    total_interest += interest
+                    previous_account_id = account_id
 
-    def handle_critical_error(self, error_message):
-        """
-        Handles critical errors by logging them and sending an alert.
-        """
-        logging.error(f"Critical Error: {error_message}")
-        # Simulate sending an alert to the Operations team
-        print(f"ALERT: {error_message}")
-        return "Error handled"
+                if previous_account_id is not None:
+                    self.update_account_balance(previous_account_id, total_interest)
+
+            return True
+        except Exception as e:
+            logging.error(f"Error processing records from {file_name}: {e}")
+            raise
+
+    def fetch_account_data(self, account_id):
+        try:
+            account_data = self.db["accounts"].find_one({"account_id": account_id})
+            return account_data
+        except Exception as e:
+            logging.error(f"Error fetching account data for account ID {account_id}: {e}")
+            raise
+
+    def fetch_cross_reference_data(self, account_id):
+        try:
+            xref_data = self.db["cross_references"].find_one({"xref_id": account_id})
+            return xref_data
+        except Exception as e:
+            logging.error(f"Error fetching cross-reference data for account ID {account_id}: {e}")
+            raise
+
+    def fetch_interest_rate(self, group_id):
+        try:
+            rate_data = self.db["discount_groups"].find_one({"group_id": group_id})
+            if rate_data:
+                return rate_data.get("interest_rate", 0)
+            else:
+                default_rate_data = self.db["discount_groups"].find_one({"group_id": "default"})
+                return default_rate_data.get("interest_rate", 0) if default_rate_data else 0
+        except Exception as e:
+            logging.error(f"Error fetching interest rate for group ID {group_id}: {e}")
+            raise
+
+    def calculate_interest(self, balance, rate):
+        try:
+            return (balance * rate) / 1200
+        except Exception as e:
+            logging.error(f"Error calculating interest: {e}")
+            raise
+
+    def update_account_balance(self, account_id, accumulated_interest):
+        try:
+            account_data = self.fetch_account_data(account_id)
+            if account_data:
+                new_balance = account_data["balance"] + accumulated_interest
+                self.db["accounts"].update_one(
+                    {"account_id": account_id},
+                    {"$set": {"balance": new_balance, "cycle_credit": 0, "cycle_debit": 0}}
+                )
+                return True
+            return False
+        except Exception as e:
+            logging.error(f"Error updating account balance for account ID {account_id}: {e}")
+            raise
+
+    def create_transaction_record(self, transaction_details):
+        try:
+            self.db["transactions"].insert_one(transaction_details)
+            return True
+        except Exception as e:
+            logging.error(f"Error creating transaction record: {e}")
+            raise
+
+    def fetch_stock_prices(self, ticker_symbols):
+        try:
+            stock_prices = {}
+            for symbol in ticker_symbols:
+                response = requests.get(f"https://api.example.com/stock/{symbol}")
+                if response.status_code == 200:
+                    data = response.json()
+                    stock_prices[symbol] = data.get("current_price", 0)
+                else:
+                    logging.error(f"Error fetching stock price for {symbol}: {response.status_code}")
+            return stock_prices
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Network error while fetching stock prices: {e}")
+            raise
+
+    def close_all_files(self):
+        try:
+            for file_obj in self.files.values():
+                self.close_file(file_obj)
+        except Exception as e:
+            logging.error(f"Error closing all files: {e}")
+            raise

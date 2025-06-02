@@ -1,143 +1,108 @@
-import java.io.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.io.*;
+import java.util.logging.*;
 
-public class Generated_Java_Code {
+public class Solution {
 
-    // Data structure to represent a customer account
-    static class CustomerAccount {
-        String accountId;
-        String status;
-        LocalDate lastPaymentDate;
-        LocalDate lastActivityDate;
-        LocalDate oldestOutstandingBalanceDate;
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
 
-        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate, LocalDate oldestOutstandingBalanceDate) {
-            this.accountId = accountId;
-            this.status = status;
-            this.lastPaymentDate = lastPaymentDate;
-            this.lastActivityDate = lastActivityDate;
-            this.oldestOutstandingBalanceDate = oldestOutstandingBalanceDate;
-        }
-    }
-
-    // Method to simulate the nightly batch process
-    public static String runNightlyBatchProcess(String inputFile) {
-        try {
-            if (inputFile == null || inputFile.isEmpty()) {
-                throw new IllegalArgumentException("Input file is empty or null");
-            }
-
-            // Simulate reading customer data from a file
-            List<CustomerAccount> customerAccounts = readCustomerData(inputFile);
-
-            // Update customer account statuses
-            List<String> auditLogs = new ArrayList<>();
-            for (CustomerAccount account : customerAccounts) {
-                String oldStatus = account.status;
-                String newStatus = determineNewStatus(account);
-                if (!oldStatus.equals(newStatus)) {
-                    account.status = newStatus;
-                    auditLogs.add(generateAuditLogEntry(account.accountId, oldStatus, newStatus, getReasonForChange(oldStatus, newStatus)));
-                }
-            }
-
-            // Write audit logs to a file
-            writeAuditLog(auditLogs);
-
-            return "Batch Process Completed";
-        } catch (Exception e) {
-            handleCriticalError(e.getMessage());
-            return "Batch Process Failed";
-        }
-    }
-
-    // Method to determine the new status of a customer account
-    public static String determineNewStatus(CustomerAccount account) {
-        LocalDate today = LocalDate.now();
-
-        if (account.lastPaymentDate != null && account.lastPaymentDate.isAfter(today.minusDays(30)) &&
-            (account.oldestOutstandingBalanceDate == null || account.oldestOutstandingBalanceDate.isAfter(today.minusDays(60)))) {
-            return "Active";
-        } else if (account.oldestOutstandingBalanceDate != null && account.oldestOutstandingBalanceDate.isAfter(today.minusDays(90)) &&
-                   account.oldestOutstandingBalanceDate.isBefore(today.minusDays(60))) {
-            return "Delinquent";
-        } else if ((account.oldestOutstandingBalanceDate != null && account.oldestOutstandingBalanceDate.isBefore(today.minusDays(90))) ||
-                   (account.lastPaymentDate == null || account.lastPaymentDate.isBefore(today.minusDays(90)))) {
-            return "Suspended";
-        } else if (account.status.equals("Suspended") && account.lastPaymentDate == null &&
-                   account.lastActivityDate != null && account.lastActivityDate.isBefore(today.minusDays(180))) {
-            return "Deactivated";
-        }
-
-        return account.status;
-    }
-
-    // Method to generate an audit log entry
-    public static String generateAuditLogEntry(String accountId, String oldStatus, String newStatus, String reason) {
-        return String.format("Account ID: %s, Old Status: %s, New Status: %s, Reason: %s", accountId, oldStatus, newStatus, reason);
-    }
-
-    // Method to get the reason for a status change
-    public static String getReasonForChange(String oldStatus, String newStatus) {
-        if (newStatus.equals("Active")) {
-            return "Payment received, balance cleared";
-        } else if (newStatus.equals("Delinquent")) {
-            return "Balance overdue > 60 days";
-        } else if (newStatus.equals("Suspended")) {
-            return "Balance overdue > 90 days or no payment activity for 90 days";
-        } else if (newStatus.equals("Deactivated")) {
-            return "Account suspended for 180 days without activity";
-        }
-        return "No change";
-    }
-
-    // Method to write audit logs to a file
-    public static void writeAuditLog(List<String> auditLogs) throws IOException {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CUSTSTAT.LOG"))) {
-            for (String log : auditLogs) {
-                writer.write(log);
-                writer.newLine();
-            }
-        }
-    }
-
-    // Method to handle critical errors
-    public static String handleCriticalError(String errorDetails) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CUSTSTAT.LOG", true))) {
-            writer.write("Critical Error: " + errorDetails);
-            writer.newLine();
-        } catch (IOException e) {
-            System.err.println("Failed to log critical error: " + e.getMessage());
-        }
-        // Simulate sending an alert to the Operations team
-        System.err.println("ALERT: " + errorDetails);
-        return "Error Handled";
-    }
-
-    // Method to simulate reading customer data from a file
-    public static List<CustomerAccount> readCustomerData(String inputFile) throws IOException {
-        List<CustomerAccount> accounts = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
-            String line;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                String accountId = parts[0];
-                String status = parts[1];
-                LocalDate lastPaymentDate = parts[2].isEmpty() ? null : LocalDate.parse(parts[2], formatter);
-                LocalDate lastActivityDate = parts[3].isEmpty() ? null : LocalDate.parse(parts[3], formatter);
-                LocalDate oldestOutstandingBalanceDate = parts[4].isEmpty() ? null : LocalDate.parse(parts[4], formatter);
-                accounts.add(new CustomerAccount(accountId, status, lastPaymentDate, lastActivityDate, oldestOutstandingBalanceDate));
-            }
-        }
-        return accounts;
-    }
-
-    // Main method to simulate the nightly batch process
     public static void main(String[] args) {
-        String result = runNightlyBatchProcess("customer_transactions.txt");
-        System.out.println(result);
+        try {
+            // Step 1: Open Required Files
+            List<String> files = Arrays.asList("TCATBAL-FILE", "XREF-FILE", "DISCGRP-FILE", "ACCOUNT-FILE", "TRANSACT-FILE");
+            Map<String, BufferedReader> fileReaders = openFiles(files);
+
+            // Step 2: Process Records from TCATBAL-FILE
+            processRecords(fileReaders.get("TCATBAL-FILE"));
+
+            // Step 3: Close All Files
+            closeFiles(fileReaders);
+
+        } catch (Exception e) {
+            logger.severe("An error occurred: " + e.getMessage());
+        }
+    }
+
+    // Method to open required files
+    public static Map<String, BufferedReader> openFiles(List<String> files) throws IOException {
+        Map<String, BufferedReader> fileReaders = new HashMap<>();
+        for (String file : files) {
+            try {
+                System.out.println("Opening file: " + file);
+                fileReaders.put(file, new BufferedReader(new FileReader(file)));
+            } catch (IOException e) {
+                logger.severe("Error opening file: " + file + " - " + e.getMessage());
+                throw e;
+            }
+        }
+        return fileReaders;
+    }
+
+    // Method to close all opened files
+    public static void closeFiles(Map<String, BufferedReader> fileReaders) {
+        for (Map.Entry<String, BufferedReader> entry : fileReaders.entrySet()) {
+            try {
+                System.out.println("Closing file: " + entry.getKey());
+                entry.getValue().close();
+            } catch (IOException e) {
+                logger.warning("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+            }
+        }
+    }
+
+    // Method to process records from TCATBAL-FILE
+    public static void processRecords(BufferedReader tcatbalFileReader) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double accumulatedInterest = 0.0;
+
+        while ((line = tcatbalFileReader.readLine()) != null) {
+            recordCount++;
+            System.out.println("Processing record: " + line);
+
+            // Simulate extracting account ID and transaction balance
+            String[] recordParts = line.split(",");
+            String accountId = recordParts[0];
+            double transactionBalance = Double.parseDouble(recordParts[1]);
+
+            // Check if account ID has changed
+            if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                // Update account with accumulated interest
+                updateAccount(lastAccountId, accumulatedInterest);
+                accumulatedInterest = 0.0; // Reset accumulated interest
+            }
+
+            // Calculate interest for the current record
+            double interestRate = getInterestRate(accountId);
+            double monthlyInterest = calculateMonthlyInterest(transactionBalance, interestRate);
+            accumulatedInterest += monthlyInterest;
+
+            lastAccountId = accountId;
+        }
+
+        // Update the last account with accumulated interest
+        if (lastAccountId != null) {
+            updateAccount(lastAccountId, accumulatedInterest);
+        }
+
+        System.out.println("Total records processed: " + recordCount);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Simulated method to retrieve interest rate
+    public static double getInterestRate(String accountId) {
+        // Simulate fetching interest rate from DISCGRP-FILE
+        return 5.0; // Default interest rate
+    }
+
+    // Simulated method to update account with accumulated interest
+    public static void updateAccount(String accountId, double accumulatedInterest) {
+        System.out.println("Updating account: " + accountId + " with accumulated interest: " + accumulatedInterest);
+        // Simulate updating account in MongoDB
     }
 }

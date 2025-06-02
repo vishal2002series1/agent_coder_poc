@@ -193,7 +193,29 @@ class AgentCoderPOC:
 
 
 def main():
-    load_dotenv()
+    # load_dotenv()
+
+    # --- DEBUGGING .env LOAD START ---
+    # Explicitly specify the path to your .env file
+    # Assuming .env is in the same directory as agent_coder_poc.py
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    expected_dotenv_path = os.path.join(current_dir, '.env')
+
+    if os.path.exists(expected_dotenv_path):
+        dotenv_loaded = load_dotenv(dotenv_path=expected_dotenv_path, verbose=True, override=True)
+        if dotenv_loaded:
+            print(f"DEBUG: Explicitly loaded .env from: {expected_dotenv_path}")
+        else:
+            print(f"DEBUG: Failed to load .env from: {expected_dotenv_path}")
+    else:
+        print(f"DEBUG: Expected .env file not found at: {expected_dotenv_path}")
+        load_dotenv(verbose=True, override=True) # Fallback to default search if explicit not found
+
+
+    # --- DEBUGGING .env LOAD END ---
+
+    debug_maven_path = os.getenv("MAVEN_EXECUTABLE_PATH")
+    print(f"DEBUG: MAVEN_EXECUTABLE_PATH loaded from .env: {debug_maven_path}")
 
     config = {
         "api_key": os.getenv("AZURE_OPENAI_API_KEY"),
@@ -254,7 +276,7 @@ def main():
 
     # requirements = "Implement a code to add two numbers."
 
-    requirementss = '''
+    requirements = '''
 [
   {
     "epic_number": 1,
@@ -355,6 +377,20 @@ def main():
         "story_details": "Implement structured logging using Python's `logging` module. Log errors with details such as timestamp, error type, and affected file or record.",
         "story_type": "Technical",
         "legacy_component": "Error Logging"
+      }
+    ]
+  },
+  {
+    "epic_number": 6,
+    "epic_description": "External Service Integration and Data Processing",
+    "user_stories": [
+      {
+        "story_number": 10,
+        "story_name": "Fetch and Process Currency Exchange Rates from External API",
+        "story_description": "As a system, when dealing with transactions in multiple currencies, I need to fetch the latest currency exchange rates from an external API and parse the data to enable accurate currency conversion within the application.",
+        "story_details": "Implement a Java module responsible for fetching currency exchange rates. This module must: \n1. Connect to an external exchange rate API provider (e.g., a free service like ExchangeRate-API: `https://api.exchangerate-api.com/v4/latest/USD`, or an alternative public/mock API endpoint that returns JSON). \n2. Utilize a robust external HTTP client library such as **Apache HttpClient** or **OkHttp** to execute the HTTP GET request to the chosen API. Avoid using Java's basic `HttpURLConnection` for this task to ensure more advanced features like connection pooling and easier request/response handling are available if needed later. \n3. The API will return data in JSON format. Use a dedicated external JSON parsing library like **Jackson** or **Gson** to parse the JSON response into Java objects. Do not implement manual JSON string parsing. \n4. Extract the required exchange rates (e.g., rates relative to a base currency like USD) from the parsed Java objects. \n5. Implement comprehensive error handling for scenarios such as network failures, API errors (e.g., non-200 HTTP status codes), timeouts, and JSON parsing exceptions. Log errors using `java.util.logging` or a more advanced external logging framework if specified elsewhere. \n6. The fetched and parsed exchange rates should be made available to other parts of the system, for instance, to be used during interest calculation or transaction record creation for foreign currency transactions.",
+        "story_type": "Functional",
+        "legacy_component": "Currency Conversion Service Interface"
       }
     ]
   }
