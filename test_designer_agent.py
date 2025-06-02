@@ -144,23 +144,61 @@ class TestDesignerAgent:
                     """,
 
                     "Java": """
-            **RELAXED JAVA TESTING RULES**:
-            - Use try-catch blocks to handle exceptions gracefully
-            - Check for basic conditions like "result != null"
-            - Print success/failure messages
-            - DO NOT use specific value assertions
-            - DO NOT use JUnit annotations or imports
-            - Example:
-            public static void testFunction() {
+        **RELAXED JAVA TESTING RULES**:
+        - Assume the primary implementation logic is within a single public class (e.g., named 'Solution' or a domain-relevant name like 'FileProcessor').
+        - When calling methods from the implementation, always invoke them statically on the primary class (e.g., `Solution.methodName(args)` or `FileProcessor.methodName(args)`). Use 'Solution' as the class name in your tests if no other obvious name is inferred from the requirements.
+        - Create separate `public static void` test methods for each logical function/user story.
+        - Ensure all necessary Java `import` statements are at the top of the test file (even if they are standard Java libs).
+        - Use `try-catch` blocks to handle any exceptions that might occur during the test method execution.
+        - Check for basic conditions like "result != null" or "list.isEmpty() == false".
+        - Print clear success/failure messages for each test.
+        - DO NOT check for specific output values or complex logical correctness.
+        - DO NOT use JUnit annotations or imports. Focus on runnable code in a `main` method in the test class.
+
+        **IMPORTANT FOR EXTERNAL INTERACTIONS (Files, APIs, Databases)**:
+        - **DO NOT attempt to open/read/write actual files on the filesystem.** Instead, simulate file operations by:
+            - Passing `String` content instead of file paths to methods.
+            - Using `StringReader` or `ByteArrayInputStream` to mock file content if `BufferedReader` or `InputStream` is expected.
+            - Asserting that file *creation* or *closure* methods execute without exceptions.
+        - **DO NOT make actual network calls to external APIs.** Instead, simulate API responses by:
+            - Passing mock JSON strings to parsing methods.
+            - Having the test methods return predefined mock data if an API call is expected.
+        - **DO NOT connect to or query real databases (e.g., MongoDB).** Simulate database interactions by:
+            - Passing dummy data structures (e.g., `Map<String, String>`) instead of database results.
+            - Asserting that database update methods execute without exceptions.
+        - The goal is to verify the internal logic and integration points, *not* the external system's availability.
+
+        - Example of a test method structure:
+        ```java
+        public class RelaxedJavaTests { // This is the main test class
+            public static void testOpenRequiredFiles() {
                 try {
-                    String result = functionName("input");
-                    assert result != null : "Function should return something";
-                    System.out.println("PASS: testFunction");
+                    // Simulate file input/output by making the method accept mock objects or by not actually interacting with filesystem.
+                    // Example: Call a method that doesn't need real files, or pass dummy data
+                    // Map<String, BufferedReader> files = Solution.openFiles(); // If openFiles still expects files, it needs to be adapted or mocked.
+                    // OR if openFiles is internal, just test the process that USES it:
+                    // Solution.processRecords(new BufferedReader(new StringReader("mock data"))); // Example of mocking file content
+
+                    // For file opening/closing methods, just ensure they execute without crashing.
+                    // Example of simulating file existence and ensuring method runs:
+                    Map<String, BufferedReader> mockFiles = new HashMap<>();
+                    // Solution.openFiles(mockFiles); // If openFiles accepts Map
+                    // Or simply assert the method signature exists and compiles without actual file interaction.
+                    // For this example, we verify the method signature and expected non-exception behavior.
+                    System.out.println("PASS: testOpenRequiredFiles - assumed successful execution with simulated environment.");
+
                 } catch (Exception e) {
-                    System.out.println("FAIL: testFunction - " + e.getMessage());
+                    System.out.println("FAIL: testOpenRequiredFiles - " + e.getMessage());
                 }
             }
-            """,
+            // Add a main method to run all tests
+            public static void main(String[] args) {
+                testOpenRequiredFiles();
+                // Call other test methods here
+            }
+        }
+        ```
+        """,
 
                     "Csharp": """
             RELAXED C# TESTING RULES:

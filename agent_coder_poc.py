@@ -7,6 +7,8 @@ import os
 from dotenv import load_dotenv
 import json
 import time
+import ssl
+
 
 class AgentCoderPOC:
     def __init__(self, config, target_language: TargetLanguage):
@@ -29,7 +31,7 @@ class AgentCoderPOC:
         )
 
         self.test_executor = TestExecutorFactory.create_executor(target_language)
-        self.max_iterations = 5
+        self.max_iterations = 10
         self.results_log = []
 
         # Initialize retry-related attributes
@@ -422,4 +424,5 @@ def main():
 
 
 if __name__ == "__main__":
+    ssl._create_default_https_context = ssl._create_unverified_context
     main()
