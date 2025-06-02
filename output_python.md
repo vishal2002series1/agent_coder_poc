@@ -23878,3 +23878,155 @@ class CustomerAccountStatusUpdater:
         print(f"ALERT: {error_message}")
         return "Error handled"
 ```
+
+## LLM Response (python)
+
+```
+```python
+import datetime
+import logging
+
+# Configure logging for audit log and error handling
+logging.basicConfig(filename='CUSTSTAT.LOG', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+class CustomerAccountStatusUpdater:
+    def __init__(self):
+        self.customer_master_file = []  # Simulated VSAM file as a list of dictionaries
+
+    def nightly_batch_process(self):
+        try:
+            # Simulate the COBOL program processing
+            self.process_customer_transactions()
+            self.update_customer_statuses()
+            self.generate_audit_log()
+            return "Batch process completed"
+        except Exception as e:
+            self.handle_critical_error(str(e))
+            return "Batch process aborted due to error"
+
+    def process_customer_transactions(self):
+        # Simulate processing daily customer transactions and payment records
+        # This would typically involve reading and updating the customer_master_file
+        pass
+
+    def update_customer_statuses(self):
+        for customer in self.customer_master_file:
+            old_status = customer['status']
+            new_status, reason = self.determine_new_status(customer)
+            if old_status != new_status:
+                customer['status'] = new_status
+                logging.info(f"Customer ID {customer['id']}: Status changed from {old_status} to {new_status} - Reason: {reason}")
+
+    def determine_new_status(self, customer):
+        # Determine the new status based on payment activity and outstanding balance
+        last_payment_date = customer.get('last_payment_date')
+        outstanding_balance_days = customer.get('outstanding_balance_days', 0)
+        status = customer.get('status')
+
+        if last_payment_date:
+            days_since_last_payment = (datetime.datetime.now() - last_payment_date).days
+        else:
+            days_since_last_payment = float('inf')
+
+        if days_since_last_payment <= 30 and outstanding_balance_days <= 60:
+            return 'Active', "Payment received, balance cleared"
+        elif 60 < outstanding_balance_days <= 90:
+            return 'Delinquent', "Balance overdue > 60 days"
+        elif outstanding_balance_days > 90 or days_since_last_payment > 90:
+            return 'Suspended', "Balance overdue > 90 days or no payment activity > 90 days"
+        elif status == 'Suspended' and days_since_last_payment > 180:
+            return 'Deactivated', "Suspended > 180 days without payment or activity"
+        return status, "No change"
+
+    def generate_audit_log(self):
+        # Simulate generating an audit log
+        logging.info("Audit log generated")
+        return "Audit log generated"
+
+    def handle_critical_error(self, error_message):
+        # Log the error and simulate sending an alert to the Operations team
+        logging.error(f"Critical error occurred: {error_message}")
+        # Simulate sending an alert (e.g., email or system notification)
+        return "Error handled"
+
+# Example usage
+if __name__ == "__main__":
+    updater = CustomerAccountStatusUpdater()
+    updater.nightly_batch_process()
+```
+```
+
+## Extracted Code (python)
+
+```
+import datetime
+import logging
+
+# Configure logging for audit log and error handling
+logging.basicConfig(filename='CUSTSTAT.LOG', level=logging.INFO, format='%(asctime)s - %(message)s')
+
+class CustomerAccountStatusUpdater:
+    def __init__(self):
+        self.customer_master_file = []  # Simulated VSAM file as a list of dictionaries
+
+    def nightly_batch_process(self):
+        try:
+            # Simulate the COBOL program processing
+            self.process_customer_transactions()
+            self.update_customer_statuses()
+            self.generate_audit_log()
+            return "Batch process completed"
+        except Exception as e:
+            self.handle_critical_error(str(e))
+            return "Batch process aborted due to error"
+
+    def process_customer_transactions(self):
+        # Simulate processing daily customer transactions and payment records
+        # This would typically involve reading and updating the customer_master_file
+        pass
+
+    def update_customer_statuses(self):
+        for customer in self.customer_master_file:
+            old_status = customer['status']
+            new_status, reason = self.determine_new_status(customer)
+            if old_status != new_status:
+                customer['status'] = new_status
+                logging.info(f"Customer ID {customer['id']}: Status changed from {old_status} to {new_status} - Reason: {reason}")
+
+    def determine_new_status(self, customer):
+        # Determine the new status based on payment activity and outstanding balance
+        last_payment_date = customer.get('last_payment_date')
+        outstanding_balance_days = customer.get('outstanding_balance_days', 0)
+        status = customer.get('status')
+
+        if last_payment_date:
+            days_since_last_payment = (datetime.datetime.now() - last_payment_date).days
+        else:
+            days_since_last_payment = float('inf')
+
+        if days_since_last_payment <= 30 and outstanding_balance_days <= 60:
+            return 'Active', "Payment received, balance cleared"
+        elif 60 < outstanding_balance_days <= 90:
+            return 'Delinquent', "Balance overdue > 60 days"
+        elif outstanding_balance_days > 90 or days_since_last_payment > 90:
+            return 'Suspended', "Balance overdue > 90 days or no payment activity > 90 days"
+        elif status == 'Suspended' and days_since_last_payment > 180:
+            return 'Deactivated', "Suspended > 180 days without payment or activity"
+        return status, "No change"
+
+    def generate_audit_log(self):
+        # Simulate generating an audit log
+        logging.info("Audit log generated")
+        return "Audit log generated"
+
+    def handle_critical_error(self, error_message):
+        # Log the error and simulate sending an alert to the Operations team
+        logging.error(f"Critical error occurred: {error_message}")
+        # Simulate sending an alert (e.g., email or system notification)
+        return "Error handled"
+
+# Example usage
+if __name__ == "__main__":
+    updater = CustomerAccountStatusUpdater()
+    updater.nightly_batch_process()
+```

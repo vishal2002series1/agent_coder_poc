@@ -48089,3 +48089,1421 @@ public class Generated_Java_Code {
     }
 }
 ```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle batch processing
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public BatchProcess() {
+            // Initialize with some sample data
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("54321", new CustomerAccount("54321", "Suspended", LocalDate.now().minusDays(200), 500));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError("Critical error during batch process: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate lastPaymentDate = account.getLastPaymentDate();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(lastPaymentDate, LocalDate.now());
+            int outstandingBalance = account.getOutstandingBalance();
+
+            if (daysSinceLastPayment <= 30 && outstandingBalance == 0) {
+                return "Active";
+            } else if (outstandingBalance > 0 && daysSinceLastPayment > 60 && daysSinceLastPayment <= 90) {
+                return "Delinquent";
+            } else if (daysSinceLastPayment > 90 || outstandingBalance > 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment > 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try {
+                AuditLogGenerator logGenerator = new AuditLogGenerator();
+                logGenerator.generateLog("ERROR", "N/A", "N/A", errorMessage);
+                return true;
+            } catch (Exception e) {
+                System.err.println("Failed to handle error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private int outstandingBalance;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, int outstandingBalance) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalance = outstandingBalance;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public int getOutstandingBalance() {
+            return outstandingBalance;
+        }
+    }
+
+    public static void main(String[] args) {
+        BatchProcess batchProcess = new BatchProcess();
+        batchProcess.runNightlyProcess();
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle batch processing
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public BatchProcess() {
+            // Initialize with some sample data
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("54321", new CustomerAccount("54321", "Suspended", LocalDate.now().minusDays(200), 500));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError("Critical error during batch process: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate lastPaymentDate = account.getLastPaymentDate();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(lastPaymentDate, LocalDate.now());
+            int outstandingBalance = account.getOutstandingBalance();
+
+            if (daysSinceLastPayment <= 30 && outstandingBalance == 0) {
+                return "Active";
+            } else if (outstandingBalance > 0 && daysSinceLastPayment > 60 && daysSinceLastPayment <= 90) {
+                return "Delinquent";
+            } else if (daysSinceLastPayment > 90 || outstandingBalance > 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment > 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try {
+                AuditLogGenerator logGenerator = new AuditLogGenerator();
+                logGenerator.generateLog("ERROR", "N/A", "N/A", errorMessage);
+                return true;
+            } catch (Exception e) {
+                System.err.println("Failed to handle error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private int outstandingBalance;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, int outstandingBalance) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalance = outstandingBalance;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public int getOutstandingBalance() {
+            return outstandingBalance;
+        }
+    }
+
+    public static void main(String[] args) {
+        BatchProcess batchProcess = new BatchProcess();
+        batchProcess.runNightlyProcess();
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle batch processing
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts;
+
+        public BatchProcess() {
+            customerAccounts = new HashMap<>();
+            // Initialize with some dummy data for demonstration purposes
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("11223", new CustomerAccount("11223", "Suspended", LocalDate.now().minusDays(200), 500));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError("Critical error during batch process: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate lastPaymentDate = account.getLastPaymentDate();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(lastPaymentDate, LocalDate.now());
+            long outstandingBalanceDays = account.getOutstandingBalanceDays();
+
+            if (daysSinceLastPayment <= 30 && outstandingBalanceDays <= 60) {
+                return "Active";
+            } else if (outstandingBalanceDays > 60 && outstandingBalanceDays < 90) {
+                return "Delinquent";
+            } else if (outstandingBalanceDays >= 90 || daysSinceLastPayment >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to generate audit logs
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating audit log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent customer accounts
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private long outstandingBalanceDays;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, long outstandingBalanceDays) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalanceDays = outstandingBalanceDays;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public long getOutstandingBalanceDays() {
+            return outstandingBalanceDays;
+        }
+    }
+
+    public static void main(String[] args) {
+        BatchProcess batchProcess = new BatchProcess();
+        boolean result = batchProcess.runNightlyProcess();
+        System.out.println("Batch process completed: " + result);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle batch processing
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts;
+
+        public BatchProcess() {
+            customerAccounts = new HashMap<>();
+            // Initialize with some dummy data for demonstration purposes
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("11223", new CustomerAccount("11223", "Suspended", LocalDate.now().minusDays(200), 500));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError("Critical error during batch process: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate lastPaymentDate = account.getLastPaymentDate();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(lastPaymentDate, LocalDate.now());
+            long outstandingBalanceDays = account.getOutstandingBalanceDays();
+
+            if (daysSinceLastPayment <= 30 && outstandingBalanceDays <= 60) {
+                return "Active";
+            } else if (outstandingBalanceDays > 60 && outstandingBalanceDays < 90) {
+                return "Delinquent";
+            } else if (outstandingBalanceDays >= 90 || daysSinceLastPayment >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to generate audit logs
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating audit log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent customer accounts
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private long outstandingBalanceDays;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, long outstandingBalanceDays) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalanceDays = outstandingBalanceDays;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public long getOutstandingBalanceDays() {
+            return outstandingBalanceDays;
+        }
+    }
+
+    public static void main(String[] args) {
+        BatchProcess batchProcess = new BatchProcess();
+        boolean result = batchProcess.runNightlyProcess();
+        System.out.println("Batch process completed: " + result);
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the batch process
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public boolean runNightlyProcess() {
+            try {
+                // Simulate loading customer data
+                loadCustomerData();
+
+                // Process each customer account
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private void loadCustomerData() {
+            // Simulate loading customer data (in a real scenario, this would involve reading from a file or database)
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), LocalDate.now().minusDays(50)));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(100), LocalDate.now().minusDays(70)));
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate now = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), now);
+            long daysSinceLastActivity = ChronoUnit.DAYS.between(account.getLastActivityDate(), now);
+
+            if (daysSinceLastPayment <= 30 && daysSinceLastActivity <= 60) {
+                return "Active";
+            } else if (daysSinceLastActivity > 60 && daysSinceLastActivity < 90) {
+                return "Delinquent";
+            } else if (daysSinceLastActivity >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastActivity >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private LocalDate lastActivityDate;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.lastActivityDate = lastActivityDate;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public LocalDate getLastActivityDate() {
+            return lastActivityDate;
+        }
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the batch process
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public boolean runNightlyProcess() {
+            try {
+                // Simulate loading customer data
+                loadCustomerData();
+
+                // Process each customer account
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private void loadCustomerData() {
+            // Simulate loading customer data (in a real scenario, this would involve reading from a file or database)
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), LocalDate.now().minusDays(50)));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(100), LocalDate.now().minusDays(70)));
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate now = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), now);
+            long daysSinceLastActivity = ChronoUnit.DAYS.between(account.getLastActivityDate(), now);
+
+            if (daysSinceLastPayment <= 30 && daysSinceLastActivity <= 60) {
+                return "Active";
+            } else if (daysSinceLastActivity > 60 && daysSinceLastActivity < 90) {
+                return "Delinquent";
+            } else if (daysSinceLastActivity >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastActivity >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private LocalDate lastActivityDate;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.lastActivityDate = lastActivityDate;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public LocalDate getLastActivityDate() {
+            return lastActivityDate;
+        }
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the nightly batch process
+    public static class BatchProcess {
+        private final Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public boolean runNightlyProcess() {
+            try {
+                for (Map.Entry<String, CustomerAccount> entry : customerAccounts.entrySet()) {
+                    CustomerAccount account = entry.getValue();
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate today = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), today);
+            long daysSinceLastActivity = ChronoUnit.DAYS.between(account.getLastActivityDate(), today);
+
+            if (daysSinceLastPayment <= 30 && account.getOutstandingBalanceDays() < 60) {
+                return "Active";
+            } else if (account.getOutstandingBalanceDays() >= 60 && account.getOutstandingBalanceDays() < 90) {
+                return "Delinquent";
+            } else if (account.getOutstandingBalanceDays() >= 90 || daysSinceLastActivity >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastActivity >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to generate audit logs
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private final String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private LocalDate lastActivityDate;
+        private int outstandingBalanceDays;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate, int outstandingBalanceDays) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.lastActivityDate = lastActivityDate;
+            this.outstandingBalanceDays = outstandingBalanceDays;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public LocalDate getLastActivityDate() {
+            return lastActivityDate;
+        }
+
+        public int getOutstandingBalanceDays() {
+            return outstandingBalanceDays;
+        }
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the nightly batch process
+    public static class BatchProcess {
+        private final Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public boolean runNightlyProcess() {
+            try {
+                for (Map.Entry<String, CustomerAccount> entry : customerAccounts.entrySet()) {
+                    CustomerAccount account = entry.getValue();
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        AuditLogGenerator logGenerator = new AuditLogGenerator();
+                        logGenerator.generateLog(account.getAccountId(), oldStatus, newStatus, "Status updated based on account activity");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate today = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), today);
+            long daysSinceLastActivity = ChronoUnit.DAYS.between(account.getLastActivityDate(), today);
+
+            if (daysSinceLastPayment <= 30 && account.getOutstandingBalanceDays() < 60) {
+                return "Active";
+            } else if (account.getOutstandingBalanceDays() >= 60 && account.getOutstandingBalanceDays() < 90) {
+                return "Delinquent";
+            } else if (account.getOutstandingBalanceDays() >= 90 || daysSinceLastActivity >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastActivity >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+    }
+
+    // Class to generate audit logs
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private final String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private LocalDate lastActivityDate;
+        private int outstandingBalanceDays;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate, int outstandingBalanceDays) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.lastActivityDate = lastActivityDate;
+            this.outstandingBalanceDays = outstandingBalanceDays;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public LocalDate getLastActivityDate() {
+            return lastActivityDate;
+        }
+
+        public int getOutstandingBalanceDays() {
+            return outstandingBalanceDays;
+        }
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the nightly batch process
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public BatchProcess() {
+            // Initialize with some dummy data for testing
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("11223", new CustomerAccount("11223", "Suspended", LocalDate.now().minusDays(200), 200));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        logStatusChange(account.getAccountId(), oldStatus, newStatus, "Status updated based on rules");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate now = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), now);
+            long daysSinceOldestBalance = account.getOutstandingBalance() > 0 ? ChronoUnit.DAYS.between(account.getLastPaymentDate(), now) : 0;
+
+            if (daysSinceLastPayment <= 30 && daysSinceOldestBalance <= 60) {
+                return "Active";
+            } else if (daysSinceOldestBalance > 60 && daysSinceOldestBalance < 90) {
+                return "Delinquent";
+            } else if (daysSinceOldestBalance >= 90 || daysSinceLastPayment >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private void logStatusChange(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n");
+            } catch (IOException e) {
+                System.err.println("Failed to log status change: " + e.getMessage());
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private int outstandingBalance;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, int outstandingBalance) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalance = outstandingBalance;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public int getOutstandingBalance() {
+            return outstandingBalance;
+        }
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
+
+public class Generated_Java_Code {
+
+    // Class to handle customer account status updates
+    public static class CustomerAccountStatusUpdater {
+        public String updateStatus(String oldStatus, String newStatus, String reason) {
+            try {
+                if (oldStatus == null || newStatus == null || reason == null) {
+                    return "Invalid input: null values provided";
+                }
+                if (oldStatus.isEmpty() || newStatus.isEmpty() || reason.isEmpty()) {
+                    return "Invalid input: empty values provided";
+                }
+                return "Status updated from " + oldStatus + " to " + newStatus + " due to: " + reason;
+            } catch (Exception e) {
+                return "Error during status update: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to handle the nightly batch process
+    public static class BatchProcess {
+        private Map<String, CustomerAccount> customerAccounts = new HashMap<>();
+
+        public BatchProcess() {
+            // Initialize with some dummy data for testing
+            customerAccounts.put("12345", new CustomerAccount("12345", "Active", LocalDate.now().minusDays(10), 0));
+            customerAccounts.put("67890", new CustomerAccount("67890", "Delinquent", LocalDate.now().minusDays(70), 100));
+            customerAccounts.put("11223", new CustomerAccount("11223", "Suspended", LocalDate.now().minusDays(200), 200));
+        }
+
+        public boolean runNightlyProcess() {
+            try {
+                for (CustomerAccount account : customerAccounts.values()) {
+                    String oldStatus = account.getStatus();
+                    String newStatus = determineNewStatus(account);
+                    if (!oldStatus.equals(newStatus)) {
+                        account.setStatus(newStatus);
+                        logStatusChange(account.getAccountId(), oldStatus, newStatus, "Status updated based on rules");
+                    }
+                }
+                return true;
+            } catch (Exception e) {
+                handleError(e.getMessage());
+                return false;
+            }
+        }
+
+        private String determineNewStatus(CustomerAccount account) {
+            LocalDate now = LocalDate.now();
+            long daysSinceLastPayment = ChronoUnit.DAYS.between(account.getLastPaymentDate(), now);
+            long daysSinceOldestBalance = account.getOutstandingBalance() > 0 ? ChronoUnit.DAYS.between(account.getLastPaymentDate(), now) : 0;
+
+            if (daysSinceLastPayment <= 30 && daysSinceOldestBalance <= 60) {
+                return "Active";
+            } else if (daysSinceOldestBalance > 60 && daysSinceOldestBalance < 90) {
+                return "Delinquent";
+            } else if (daysSinceOldestBalance >= 90 || daysSinceLastPayment >= 90) {
+                return "Suspended";
+            } else if (account.getStatus().equals("Suspended") && daysSinceLastPayment >= 180) {
+                return "Deactivated";
+            }
+            return account.getStatus();
+        }
+
+        public boolean handleError(String errorMessage) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("ERROR: " + errorMessage + "\n");
+                return true;
+            } catch (IOException e) {
+                System.err.println("Failed to log error: " + e.getMessage());
+                return false;
+            }
+        }
+
+        private void logStatusChange(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                writer.write("Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n");
+            } catch (IOException e) {
+                System.err.println("Failed to log status change: " + e.getMessage());
+            }
+        }
+    }
+
+    // Class to handle audit log generation
+    public static class AuditLogGenerator {
+        public String generateLog(String accountId, String oldStatus, String newStatus, String reason) {
+            try (FileWriter writer = new FileWriter("CUSTSTAT.LOG", true)) {
+                String logEntry = "Account ID: " + accountId + ", Old Status: " + oldStatus + ", New Status: " + newStatus + ", Reason: " + reason + "\n";
+                writer.write(logEntry);
+                return logEntry;
+            } catch (IOException e) {
+                return "Error generating log: " + e.getMessage();
+            }
+        }
+    }
+
+    // Class to represent a customer account
+    public static class CustomerAccount {
+        private String accountId;
+        private String status;
+        private LocalDate lastPaymentDate;
+        private int outstandingBalance;
+
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, int outstandingBalance) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.outstandingBalance = outstandingBalance;
+        }
+
+        public String getAccountId() {
+            return accountId;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public LocalDate getLastPaymentDate() {
+            return lastPaymentDate;
+        }
+
+        public int getOutstandingBalance() {
+            return outstandingBalance;
+        }
+    }
+}
+```
