@@ -27,7 +27,12 @@ class LanguageConfig:
                 "code_block_marker": "```java",
                 "test_framework": "junit",
                 "package_manager": "maven",
-                "allowed_packages": {"junit", "mockito", "apache-commons"},
+                "allowed_packages": {
+                                        "junit:junit",
+                                        "org.mockito:mockito-core",
+                                        "org.apache.commons:commons-lang3",
+                                        "com.google.gson:gson"
+                                    },
                 "timeout": 45
             },
             TargetLanguage.CSHARP: {

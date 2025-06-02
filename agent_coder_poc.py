@@ -29,7 +29,7 @@ class AgentCoderPOC:
         )
 
         self.test_executor = TestExecutorFactory.create_executor(target_language)
-        self.max_iterations = 3
+        self.max_iterations = 5
         self.results_log = []
 
         # Initialize retry-related attributes
@@ -71,7 +71,7 @@ class AgentCoderPOC:
                     print(f"❌ {language_name} code generation failed: {code_result['error']}")
                     continue
                 code = code_result["code"]
-                print(f"--- Extracted code for {self.target_language.value} ---\n{code}\n--- End of code ---")
+                # print(f"--- Extracted code for {self.target_language.value} ---\n{code}\n--- End of code ---")
                 print(f"✅ {language_name} code generated")
 
                 # Store the code for potential retry
@@ -246,7 +246,7 @@ def main():
     ** It should just not be a function definition, but a complete code file that can be executed directly.
     """
 
-    requirements = '''As a developer, I want to implement file handling in Python to open, read, write, and close files (TCATBAL-FILE, XREF-FILE, DISCGRP-FILE, ACCOUNT-FILE, TRANSACT-FILE), so that data processing is seamless.
+    requirements1 = '''As a developer, I want to implement file handling in Python to open, read, write, and close files (TCATBAL-FILE, XREF-FILE, DISCGRP-FILE, ACCOUNT-FILE, TRANSACT-FILE), so that data processing is seamless.
 
                     As a developer, I want to compute monthly interest using the formula (TRAN-CAT-BAL * DIS-INT-RATE) / 1200, so that interest calculations are accurate and follow business rules.
 
@@ -254,7 +254,7 @@ def main():
 
     # requirements = "Implement a code to add two numbers."
 
-    requirements = '''
+    requirementss = '''
 [
   {
     "epic_number": 1,
@@ -361,76 +361,6 @@ def main():
 ]
     '''
 
-    requirements1 = '''
-
-            {
-            "epic_number": 1,
-            "epic_description": "Transaction Data Ingestion and Standardization",
-            "user_stories": [
-                {
-                "story_number": 1,
-                "story_name": "Retrieve Transactions from Legacy Oracle System",
-                "story_description": "As a data reconciliation service, I need to fetch daily customer transaction records from the legacy Oracle 11g database.",
-                "story_details": "Implement a **Java module** that connects to the Oracle 11g database, queries the `CUSTOMER_TXN_LOG` table for the previous day's transactions, and exports the data into a JSON file (`oracle_txn_YYYYMMDD.json`). This module must use the **JDBC driver for Oracle**.",
-                "story_type": "Technical",
-                "legacy_component": "Oracle Data Extraction"
-                },
-                {
-                "story_number": 2,
-                "story_name": "Standardize SAP Transaction Exports",
-                "story_description": "As a data reconciliation service, I need to process daily transaction export files from SAP to a standardized format.",
-                "story_details": "Implement a **Python script** that reads the daily `.csv` export file from SAP (`sap_txn_YYYYMMDD.csv`), parses each transaction, and converts it into a standardized JSON format, storing it in `standard_sap_txn_YYYYMMDD.json`. This script must use the **Pandas library for CSV parsing**.",
-                "story_type": "Technical",
-                "legacy_component": "SAP Data Transformation"
-                }
-            ]
-            },
-            {
-            "epic_number": 2,
-            "epic_description": "Cross-System Reconciliation and Anomaly Detection",
-            "user_stories": [
-                {
-                "story_number": 3,
-                "story_name": "Merge and Deduplicate Transaction Data",
-                "story_description": "As a data reconciliation service, I need to merge the standardized transaction data from Oracle and SAP and remove duplicates to create a unified view.",
-                "story_details": "Implement a **Python script** that reads both `oracle_txn_YYYYMMDD.json` and `standard_sap_txn_YYYYMMDD.json`, merges their contents, and deduplicates transactions based on a composite key (e.g., `transaction_id + customer_id + amount`). The unified data should be stored in `unified_transactions_YYYYMMDD.json`. This script must use the **Pandas library for data manipulation**.",
-                "story_type": "Functional",
-                "legacy_component": "Data Unification"
-                },
-                {
-                "story_number": 4,
-                "story_name": "Identify Reconciliation Discrepancies",
-                "story_description": "As a financial auditor, I want to quickly identify transactions present in one system but missing from another, or where amounts differ, to investigate potential issues.",
-                "story_details": "Implement a **Python module** that compares the unified transaction data against original source flags (indicating if a transaction came from Oracle, SAP, or both). It should identify: 1) transactions unique to Oracle, 2) transactions unique to SAP, and 3) transactions present in both but with differing amounts. Discrepancies should be logged to a `discrepancy_log_YYYYMMDD.txt` file.",
-                "story_type": "Functional",
-                "legacy_component": "Reconciliation Logic"
-                }
-            ]
-            },
-            {
-            "epic_number": 3,
-            "epic_description": "Reporting and Alerting",
-            "user_stories": [
-                {
-                "story_number": 5,
-                "story_name": "Generate Daily Reconciliation Summary Report",
-                "story_description": "As a financial controller, I need a daily summary report of reconciled transactions and discrepancies.",
-                "story_details": "Implement a **Python script** that aggregates the unified transaction data and the discrepancy log. It should generate an Excel report (`reconciliation_report_YYYYMMDD.xlsx`) summarizing: total transactions from each source, total unified transactions, and a list of all identified discrepancies. This script must use the **OpenPyXL library for Excel generation**.",
-                "story_type": "Functional",
-                "legacy_component": "Report Generation"
-                },
-                {
-                "story_number": 6,
-                "story_name": "Send Anomaly Alerts",
-                "story_description": "As an operations manager, I want to receive immediate alerts for critical reconciliation discrepancies.",
-                "story_details": "Implement a **Java module** that checks the `discrepancy_log_YYYYMMDD.txt` file for high-severity discrepancies (e.g., total discrepancy amount exceeding $10,000). If such discrepancies are found, it should send an email notification to predefined recipients. This module must use **JavaMail API** for sending emails.",
-                "story_type": "Functional",
-                "legacy_component": "Alerting Mechanism"
-                }
-            ]
-            }
-
-            '''
     
     for target_language in languages_to_test:
         print(f"\n{'='*50}")

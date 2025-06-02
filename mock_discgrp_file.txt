@@ -1,0 +1,2 @@
+GroupID,InterestRate
+1,5.0

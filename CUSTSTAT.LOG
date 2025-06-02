@@ -10,3 +10,23 @@ Critical error: [Errno 2] No such file or directory: 'CUSTOMER_MASTER_FILE.csv'
 2025-05-30 00:24:06,339 - Customer ID: 1 - Status changed from Suspended to Active. Reason: Payment received, balance cleared
 2025-05-30 00:24:06,339 - Customer ID: 2 - Status changed from Active to Delinquent. Reason: Balance overdue > 60 days
 2025-05-30 00:24:06,339 - Customer ID: 3 - Status changed from Delinquent to Suspended. Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-01 01:02:42,005 - Critical Error: 'datetime.datetime' object has no attribute 'days'
+2025-06-01 01:02:42,005 - Customer ID: 1, Old Status: Active, New Status: Delinquent, Reason: Balance overdue > 60 days
+2025-06-01 01:02:42,006 - Customer ID: 2, Old Status: Suspended, New Status: Deactivated, Reason: Suspended for 180 days
+2025-06-01 01:02:42,006 - Critical Error: File access error
+2025-06-01 01:02:42,006 - Critical Error: 
+2025-06-01 01:02:42,006 - Critical Error: Invalid data format
+2025-06-01 01:05:14,579 - Audit Log - Customer ID: 1, Status Change: Active -> Delinquent, Reason: Balance overdue > 60 days
+2025-06-01 01:05:14,580 - Audit Log - Customer ID: 2, Status Change: Suspended -> Deactivated, Reason: Suspended for 180 days
+2025-06-01 01:05:14,580 - Critical Error: File access error
+2025-06-01 01:31:40,873 - Customer ID: 1, Old Status: Active, New Status: Suspended, Reason: Balance overdue > 90 days or no payment activity > 90 days
+2025-06-01 10:42:48,119 - Customer status changed: Old Status: Active, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-01 10:42:48,120 - Audit Log - Customer ID: 1, Old Status: Active, New Status: Delinquent, Reason: Balance overdue > 60 days
+2025-06-01 10:42:48,120 - Audit Log - Customer ID: 2, Old Status: Suspended, New Status: Deactivated, Reason: Suspended for 180 days
+2025-06-01 10:42:48,120 - Critical Error: File access error
+2025-06-01 10:42:48,120 - Critical Error: 
+2025-06-01 10:42:48,120 - Customer status changed: Old Status: Active, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days
+2025-06-01 10:42:48,120 - Audit Log - Customer ID: 1, Old Status: Active, New Status: Delinquent, Reason: Balance overdue > 60 days
+2025-06-01 10:42:48,120 - Audit Log - Customer ID: 2, Old Status: Suspended, New Status: Deactivated, Reason: Suspended for 180 days
+2025-06-01 10:42:48,120 - Critical Error: Invalid data format
+2025-06-02 07:59:31,714 - Customer ID: 1, Old Status: Active, New Status: Suspended, Reason: Balance overdue > 90 days or no payment for 90 days

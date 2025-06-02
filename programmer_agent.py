@@ -58,6 +58,7 @@ class ProgrammerAgent:
         ** Generated code should not contain any test cases. **
         ** Do not use external libraries even if requirements suggest it. **   
         ** Strinctly use system libraries only. ** 
+
           
               """
         elif self.target_language == TargetLanguage.PYTHON:
@@ -107,12 +108,14 @@ class ProgrammerAgent:
 
                 """
             prompt += """
-            LEARN FROM THESE ERRORS:
+            THINK STEP BY STEP AND LEARN FROM THESE ERRORS:
 
             Fix the specific issues mentioned in the error messages
             Ensure field names match exactly between your code and the tests
             Handle edge cases properly
             Make sure your code structure is compatible with the test expectations
+            if code is same as previous code, change the entire coding approach logic and try newer approach to solve the problem.
+            
             """
 
         prompt += f"""

@@ -1,184 +1,143 @@
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.logging.*;
 
 public class Generated_Java_Code {
 
-    // Logger for error handling and logging
-    private static final Logger logger = Logger.getLogger(Generated_Java_Code.class.getName());
+    // Data structure to represent a customer account
+    static class CustomerAccount {
+        String accountId;
+        String status;
+        LocalDate lastPaymentDate;
+        LocalDate lastActivityDate;
+        LocalDate oldestOutstandingBalanceDate;
 
-    // File names
-    private static final String TCATBAL_FILE = "TCATBAL-FILE";
-    private static final String XREF_FILE = "XREF-FILE";
-    private static final String DISCGRP_FILE = "DISCGRP-FILE";
-    private static final String ACCOUNT_FILE = "ACCOUNT-FILE";
-    private static final String TRANSACT_FILE = "TRANSACT-FILE";
-
-    // File handles
-    private BufferedReader tcatbalReader;
-    private BufferedReader xrefReader;
-    private BufferedReader discgrpReader;
-    private BufferedReader accountReader;
-    private BufferedWriter transactWriter;
-
-    // Data structures for processing
-    private Map<String, String> accountData = new HashMap<>();
-    private Map<String, String> xrefData = new HashMap<>();
-    private Map<String, Double> interestRates = new HashMap<>();
-
-    // Open all required files
-    public void openFiles() {
-        try {
-            tcatbalReader = new BufferedReader(new FileReader(TCATBAL_FILE));
-            xrefReader = new BufferedReader(new FileReader(XREF_FILE));
-            discgrpReader = new BufferedReader(new FileReader(DISCGRP_FILE));
-            accountReader = new BufferedReader(new FileReader(ACCOUNT_FILE));
-            transactWriter = new BufferedWriter(new FileWriter(TRANSACT_FILE, true));
-        } catch (IOException e) {
-            logger.severe("Error opening files: " + e.getMessage());
-            throw new RuntimeException("Failed to open files", e);
+        public CustomerAccount(String accountId, String status, LocalDate lastPaymentDate, LocalDate lastActivityDate, LocalDate oldestOutstandingBalanceDate) {
+            this.accountId = accountId;
+            this.status = status;
+            this.lastPaymentDate = lastPaymentDate;
+            this.lastActivityDate = lastActivityDate;
+            this.oldestOutstandingBalanceDate = oldestOutstandingBalanceDate;
         }
     }
 
-    // Close all opened files
-    public void closeFiles() {
+    // Method to simulate the nightly batch process
+    public static String runNightlyBatchProcess(String inputFile) {
         try {
-            if (tcatbalReader != null) tcatbalReader.close();
-            if (xrefReader != null) xrefReader.close();
-            if (discgrpReader != null) discgrpReader.close();
-            if (accountReader != null) accountReader.close();
-            if (transactWriter != null) transactWriter.close();
-        } catch (IOException e) {
-            logger.severe("Error closing files: " + e.getMessage());
-        }
-    }
-
-    // Process records from TCATBAL-FILE
-    public void processRecords() {
-        try {
-            String line;
-            int recordCount = 0;
-            String previousAccountId = null;
-            double accumulatedInterest = 0.0;
-
-            while ((line = tcatbalReader.readLine()) != null) {
-                recordCount++;
-                String[] fields = line.split(",");
-                String accountId = fields[0];
-                double transactionBalance = Double.parseDouble(fields[1]);
-                String transactionCategory = fields[2];
-
-                if (!accountId.equals(previousAccountId) && previousAccountId != null) {
-                    updateAccount(previousAccountId, accumulatedInterest);
-                    accumulatedInterest = 0.0;
-                }
-
-                double interestRate = getInterestRate(accountId, transactionCategory);
-                double monthlyInterest = (transactionBalance * interestRate) / 1200;
-                accumulatedInterest += monthlyInterest;
-
-                previousAccountId = accountId;
+            if (inputFile == null || inputFile.isEmpty()) {
+                throw new IllegalArgumentException("Input file is empty or null");
             }
 
-            if (previousAccountId != null) {
-                updateAccount(previousAccountId, accumulatedInterest);
-            }
+            // Simulate reading customer data from a file
+            List<CustomerAccount> customerAccounts = readCustomerData(inputFile);
 
-        } catch (IOException e) {
-            logger.severe("Error processing records: " + e.getMessage());
-        }
-    }
-
-    // Retrieve account and cross-reference data
-    public void retrieveData() {
-        try {
-            String line;
-
-            while ((line = accountReader.readLine()) != null) {
-                String[] fields = line.split(",");
-                accountData.put(fields[0], line); // Account ID as key
-            }
-
-            while ((line = xrefReader.readLine()) != null) {
-                String[] fields = line.split(",");
-                xrefData.put(fields[0], line); // Cross-reference ID as key
-            }
-
-        } catch (IOException e) {
-            logger.severe("Error retrieving data: " + e.getMessage());
-        }
-    }
-
-    // Calculate interest rate from DISCGRP-FILE
-    private double getInterestRate(String accountId, String transactionCategory) {
-        try {
-            String accountGroupId = xrefData.get(accountId).split(",")[1];
-            String key = accountGroupId + "-" + transactionCategory;
-
-            if (interestRates.containsKey(key)) {
-                return interestRates.get(key);
-            }
-
-            String line;
-            while ((line = discgrpReader.readLine()) != null) {
-                String[] fields = line.split(",");
-                String groupKey = fields[0] + "-" + fields[1];
-                double rate = Double.parseDouble(fields[2]);
-                interestRates.put(groupKey, rate);
-
-                if (groupKey.equals(key)) {
-                    return rate;
+            // Update customer account statuses
+            List<String> auditLogs = new ArrayList<>();
+            for (CustomerAccount account : customerAccounts) {
+                String oldStatus = account.status;
+                String newStatus = determineNewStatus(account);
+                if (!oldStatus.equals(newStatus)) {
+                    account.status = newStatus;
+                    auditLogs.add(generateAuditLogEntry(account.accountId, oldStatus, newStatus, getReasonForChange(oldStatus, newStatus)));
                 }
             }
 
-        } catch (IOException e) {
-            logger.severe("Error retrieving interest rate: " + e.getMessage());
-        }
+            // Write audit logs to a file
+            writeAuditLog(auditLogs);
 
-        return 0.0; // Default interest rate
-    }
-
-    // Update account balances
-    private void updateAccount(String accountId, double accumulatedInterest) {
-        try {
-            String accountRecord = accountData.get(accountId);
-            String[] fields = accountRecord.split(",");
-            double currentBalance = Double.parseDouble(fields[2]);
-            double updatedBalance = currentBalance + accumulatedInterest;
-
-            // Update account record
-            fields[2] = String.valueOf(updatedBalance);
-            accountData.put(accountId, String.join(",", fields));
-
-            // Write transaction record
-            createTransactionRecord(accountId, accumulatedInterest);
-
+            return "Batch Process Completed";
         } catch (Exception e) {
-            logger.severe("Error updating account: " + e.getMessage());
+            handleCriticalError(e.getMessage());
+            return "Batch Process Failed";
         }
     }
 
-    // Create transaction record
-    private void createTransactionRecord(String accountId, double amount) {
-        try {
-            String transactionRecord = accountId + "," + amount + "," + new Date().toString();
-            transactWriter.write(transactionRecord);
-            transactWriter.newLine();
+    // Method to determine the new status of a customer account
+    public static String determineNewStatus(CustomerAccount account) {
+        LocalDate today = LocalDate.now();
+
+        if (account.lastPaymentDate != null && account.lastPaymentDate.isAfter(today.minusDays(30)) &&
+            (account.oldestOutstandingBalanceDate == null || account.oldestOutstandingBalanceDate.isAfter(today.minusDays(60)))) {
+            return "Active";
+        } else if (account.oldestOutstandingBalanceDate != null && account.oldestOutstandingBalanceDate.isAfter(today.minusDays(90)) &&
+                   account.oldestOutstandingBalanceDate.isBefore(today.minusDays(60))) {
+            return "Delinquent";
+        } else if ((account.oldestOutstandingBalanceDate != null && account.oldestOutstandingBalanceDate.isBefore(today.minusDays(90))) ||
+                   (account.lastPaymentDate == null || account.lastPaymentDate.isBefore(today.minusDays(90)))) {
+            return "Suspended";
+        } else if (account.status.equals("Suspended") && account.lastPaymentDate == null &&
+                   account.lastActivityDate != null && account.lastActivityDate.isBefore(today.minusDays(180))) {
+            return "Deactivated";
+        }
+
+        return account.status;
+    }
+
+    // Method to generate an audit log entry
+    public static String generateAuditLogEntry(String accountId, String oldStatus, String newStatus, String reason) {
+        return String.format("Account ID: %s, Old Status: %s, New Status: %s, Reason: %s", accountId, oldStatus, newStatus, reason);
+    }
+
+    // Method to get the reason for a status change
+    public static String getReasonForChange(String oldStatus, String newStatus) {
+        if (newStatus.equals("Active")) {
+            return "Payment received, balance cleared";
+        } else if (newStatus.equals("Delinquent")) {
+            return "Balance overdue > 60 days";
+        } else if (newStatus.equals("Suspended")) {
+            return "Balance overdue > 90 days or no payment activity for 90 days";
+        } else if (newStatus.equals("Deactivated")) {
+            return "Account suspended for 180 days without activity";
+        }
+        return "No change";
+    }
+
+    // Method to write audit logs to a file
+    public static void writeAuditLog(List<String> auditLogs) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CUSTSTAT.LOG"))) {
+            for (String log : auditLogs) {
+                writer.write(log);
+                writer.newLine();
+            }
+        }
+    }
+
+    // Method to handle critical errors
+    public static String handleCriticalError(String errorDetails) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("CUSTSTAT.LOG", true))) {
+            writer.write("Critical Error: " + errorDetails);
+            writer.newLine();
         } catch (IOException e) {
-            logger.severe("Error creating transaction record: " + e.getMessage());
+            System.err.println("Failed to log critical error: " + e.getMessage());
         }
+        // Simulate sending an alert to the Operations team
+        System.err.println("ALERT: " + errorDetails);
+        return "Error Handled";
     }
 
-    // Main method to execute the program
-    public static void main(String[] args) {
-        Generated_Java_Code program = new Generated_Java_Code();
-
-        try {
-            program.openFiles();
-            program.retrieveData();
-            program.processRecords();
-        } finally {
-            program.closeFiles();
+    // Method to simulate reading customer data from a file
+    public static List<CustomerAccount> readCustomerData(String inputFile) throws IOException {
+        List<CustomerAccount> accounts = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(inputFile))) {
+            String line;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                String accountId = parts[0];
+                String status = parts[1];
+                LocalDate lastPaymentDate = parts[2].isEmpty() ? null : LocalDate.parse(parts[2], formatter);
+                LocalDate lastActivityDate = parts[3].isEmpty() ? null : LocalDate.parse(parts[3], formatter);
+                LocalDate oldestOutstandingBalanceDate = parts[4].isEmpty() ? null : LocalDate.parse(parts[4], formatter);
+                accounts.add(new CustomerAccount(accountId, status, lastPaymentDate, lastActivityDate, oldestOutstandingBalanceDate));
+            }
         }
+        return accounts;
+    }
+
+    // Main method to simulate the nightly batch process
+    public static void main(String[] args) {
+        String result = runNightlyBatchProcess("customer_transactions.txt");
+        System.out.println(result);
     }
 }

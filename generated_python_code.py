@@ -1,136 +1,85 @@
+import datetime
 import logging
 
-# Configure logging
-logging.basicConfig(
-    level=logging.ERROR,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler("error.log"), logging.StreamHandler()]
-)
+# Configure logging for the audit log
+logging.basicConfig(filename='CUSTSTAT.LOG', level=logging.INFO, 
+                    format='%(asctime)s - %(message)s')
 
-class FinancialProcessingSystem:
+class CustomerAccountStatusUpdater:
     def __init__(self):
-        self.files = {}
-        self.accumulated_interest = 0
-        self.previous_account_id = None
+        self.current_date = datetime.datetime.now()
 
-    def open_file(self, file_name):
+    def nightly_batch_process(self):
         """
-        Opens a file and stores the file object in the system's file dictionary.
+        Simulates the nightly batch process that updates customer account statuses.
         """
         try:
-            file_obj = open(file_name, 'w')
-            self.files[file_name] = file_obj
-            return file_obj
+            # Simulate the COBOL program processing
+            self.process_customer_accounts()
+            return "Batch process completed"
         except Exception as e:
-            self.log_error(f"Error opening file {file_name}: {e}")
-            raise
+            self.handle_critical_error(f"Critical error during batch process: {e}")
+            return None
 
-    def close_file(self, file_name):
+    def process_customer_accounts(self):
         """
-        Closes a file and removes its reference from the system's file dictionary.
+        Processes customer accounts and updates their statuses based on the rules.
         """
-        try:
-            if file_name in self.files:
-                self.files[file_name].close()
-                del self.files[file_name]
-        except Exception as e:
-            self.log_error(f"Error closing file {file_name}: {e}")
-            raise
+        # Simulated customer data
+        customer_data_list = [
+            {"CUSTOMER_ID": 1, "CUSTOMER_ACCOUNT_STATUS": "Active", 
+             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=20), 
+             "OUTSTANDING_BALANCE_DAYS": 0},
+            {"CUSTOMER_ID": 2, "CUSTOMER_ACCOUNT_STATUS": "Active", 
+             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=70), 
+             "OUTSTANDING_BALANCE_DAYS": 75},
+            {"CUSTOMER_ID": 3, "CUSTOMER_ACCOUNT_STATUS": "Delinquent", 
+             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=100), 
+             "OUTSTANDING_BALANCE_DAYS": 95},
+            {"CUSTOMER_ID": 4, "CUSTOMER_ACCOUNT_STATUS": "Suspended", 
+             "LAST_PAYMENT_DATE": self.current_date - datetime.timedelta(days=200), 
+             "OUTSTANDING_BALANCE_DAYS": 0},
+        ]
 
-    def process_records(self, file_name):
-        """
-        Processes records from the given file. Simulates record processing logic.
-        """
-        try:
-            # Simulated record processing logic
-            self.accumulated_interest = 0
-            self.previous_account_id = None
-            return True
-        except Exception as e:
-            self.log_error(f"Error processing records from {file_name}: {e}")
-            raise
+        for customer_data in customer_data_list:
+            old_status = customer_data["CUSTOMER_ACCOUNT_STATUS"]
+            new_status, reason = self.determine_new_status(customer_data)
+            if old_status != new_status:
+                customer_data["CUSTOMER_ACCOUNT_STATUS"] = new_status
+                self.generate_audit_log(customer_data, old_status, new_status, reason)
 
-    def fetch_account_data(self, account_id):
+    def determine_new_status(self, customer_data):
         """
-        Fetches account data based on the account ID.
+        Determines the new status for a customer based on their payment history and balance.
         """
-        try:
-            # Simulated account data retrieval
-            return {"account_id": account_id}
-        except Exception as e:
-            self.log_error(f"Error fetching account data for account ID {account_id}: {e}")
-            raise
+        last_payment_date = customer_data.get("LAST_PAYMENT_DATE")
+        outstanding_balance_days = customer_data.get("OUTSTANDING_BALANCE_DAYS")
+        days_since_last_payment = (self.current_date - last_payment_date).days if last_payment_date else float('inf')
 
-    def fetch_cross_reference_data(self, account_id):
-        """
-        Fetches cross-reference data based on the account ID.
-        """
-        try:
-            # Simulated cross-reference data retrieval
-            return {"xref_id": account_id}
-        except Exception as e:
-            self.log_error(f"Error fetching cross-reference data for account ID {account_id}: {e}")
-            raise
+        if days_since_last_payment <= 30 and outstanding_balance_days <= 60:
+            return "Active", "Payment received, balance cleared"
+        elif 60 < outstanding_balance_days < 90:
+            return "Delinquent", "Balance overdue > 60 days"
+        elif outstanding_balance_days >= 90 or days_since_last_payment >= 90:
+            return "Suspended", "Balance overdue > 90 days or no payment for 90 days"
+        elif customer_data["CUSTOMER_ACCOUNT_STATUS"] == "Suspended" and days_since_last_payment >= 180:
+            return "Deactivated", "Account suspended for 180 days without payment"
+        return customer_data["CUSTOMER_ACCOUNT_STATUS"], "No status change"
 
-    def calculate_monthly_interest(self, balance, interest_rate):
+    def generate_audit_log(self, customer_data, old_status, new_status, reason):
         """
-        Calculates monthly interest based on the balance and interest rate.
+        Generates an audit log entry for a status change.
         """
-        try:
-            return (balance * interest_rate) / 1200
-        except Exception as e:
-            self.log_error(f"Error calculating monthly interest: {e}")
-            raise
+        log_message = (f"Customer ID: {customer_data['CUSTOMER_ID']}, "
+                       f"Status changed from {old_status} to {new_status}, Reason: {reason}")
+        logging.info(log_message)
+        return "Audit log generated"
 
-    def update_account_balance(self, account_id, accumulated_interest):
+    def handle_critical_error(self, error_message):
         """
-        Updates the account balance with the accumulated interest.
+        Handles critical errors by logging them and sending an alert.
         """
-        try:
-            # Simulated account update logic
-            return True
-        except Exception as e:
-            self.log_error(f"Error updating account balance for account ID {account_id}: {e}")
-            raise
-
-    def create_transaction_record(self, transaction_details):
-        """
-        Creates a transaction record with the given details.
-        """
-        try:
-            # Simulated transaction record creation logic
-            return True
-        except Exception as e:
-            self.log_error(f"Error creating transaction record: {e}")
-            raise
-
-    def log_error(self, message):
-        """
-        Logs an error message using the logging module.
-        """
-        logging.error(message)
-
-    def main(self):
-        """
-        Main method to execute the system's functionality.
-        """
-        try:
-            # Open required files
-            self.open_file("TCATBAL-FILE")
-            self.open_file("XREF-FILE")
-            self.open_file("DISCGRP-FILE")
-            self.open_file("ACCOUNT-FILE")
-            self.open_file("TRANSACT-FILE")
-
-            # Process records
-            self.process_records("TCATBAL-FILE")
-
-            # Close all files
-            self.close_file("TCATBAL-FILE")
-            self.close_file("XREF-FILE")
-            self.close_file("DISCGRP-FILE")
-            self.close_file("ACCOUNT-FILE")
-            self.close_file("TRANSACT-FILE")
-        except Exception as e:
-            self.log_error(f"Error in main execution: {e}")
-            raise
+        logging.error(f"Critical Error: {error_message}")
+        # Simulate sending an alert to the Operations team
+        print(f"ALERT: {error_message}")
+        return "Error handled"
