@@ -279,7 +279,11 @@ def main():
     # requirements = "Implement a code to add two numbers."
 
     requirements = '''
-[
+[  { "Cloud" : AWS,
+      " Database" : sqllite"
+      "Files" : S3
+
+}.
   {
     "epic_number": 1,
     "epic_description": "File Initialization and Management",
@@ -381,7 +385,9 @@ def main():
         "legacy_component": "Error Logging"
       }
     ]
-  },
+  }
+  '''
+    requirements1 = '''
   {
     "epic_number": 6,
     "epic_description": "External Service Integration and Data Processing",

@@ -72,6 +72,8 @@ class ProgrammerAgent:
 
         IMPORTANT: Use the exact same field names and data structures as shown in the tests.
         - The class should contain a main method if necessary to run the code
+        - Try to use cloud infra and database as provided in the requirements.
+        -** Always incorporate cloud infrastructure provided in requirements. Eg AWS, GCP, Azure**
         - **Always include all necessary import statements at the top of the file**
         - Use the exact same field names and data structures as shown in the tests
         - Generate clean, well-documented implementation code

@@ -14,3 +14,9 @@
 2025-06-03 03:16:14,085 - INFO - Opened file: ACCOUNT-FILE
 2025-06-03 03:16:14,086 - INFO - Opened file: TRANSACT-FILE
 2025-06-03 03:16:14,086 - INFO - Processing records from file.
+2025-06-03 03:53:34,033 - INFO - File TCATBAL-FILE opened successfully.
+2025-06-03 03:53:34,033 - INFO - File XREF-FILE opened successfully.
+2025-06-03 03:53:34,033 - INFO - File DISCGRP-FILE opened successfully.
+2025-06-03 03:53:34,033 - INFO - File ACCOUNT-FILE opened successfully.
+2025-06-03 03:53:34,033 - INFO - File TRANSACT-FILE opened successfully.
+2025-06-03 03:53:34,034 - INFO - Processed 0 records from TCATBAL-FILE.

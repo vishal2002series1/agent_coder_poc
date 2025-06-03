@@ -92993,3 +92993,4813 @@ public class Solution {
     }
 }
 ```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hc.client5.http.fluent.Request;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(BufferedReader file) throws IOException {
+        try {
+            String line;
+            int recordCount = 0;
+            String previousAccountId = null;
+            double totalInterest = 0.0;
+
+            while ((line = file.readLine()) != null) {
+                recordCount++;
+                // Simulate processing logic
+                String currentAccountId = "mockAccountId"; // Replace with actual logic to extract account ID
+                if (!currentAccountId.equals(previousAccountId)) {
+                    if (previousAccountId != null) {
+                        // Update account with accumulated interest
+                        logger.info("Updating account " + previousAccountId + " with interest: " + totalInterest);
+                    }
+                    totalInterest = 0.0;
+                    previousAccountId = currentAccountId;
+                }
+                // Simulate interest calculation
+                totalInterest += 10.0; // Replace with actual interest calculation logic
+            }
+            logger.info("Processed " + recordCount + " records.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing records: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountAndXRefData(String accountId, Map<String, String> accountData, Map<String, String> xRefData) {
+        try {
+            String accountInfo = accountData.get(accountId);
+            String xRefInfo = xRefData.get(accountId);
+
+            if (accountInfo == null || xRefInfo == null) {
+                throw new IllegalArgumentException("Data not found for account ID: " + accountId);
+            }
+            logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving data: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        try {
+            double interest = (transactionBalance * interestRate) / 1200;
+            logger.info("Calculated monthly interest: " + interest);
+            return interest;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error calculating interest: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest, Map<String, Double> accountBalances) {
+        try {
+            double currentBalance = accountBalances.getOrDefault(accountId, 0.0);
+            currentBalance += accumulatedInterest;
+            accountBalances.put(accountId, currentBalance);
+            logger.info("Updated account balance for account ID: " + accountId + " to " + currentBalance);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error updating account balances: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        try {
+            // Simulate transaction record creation
+            logger.info("Created transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error creating transaction record: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchAndProcessExchangeRates(String apiResponse) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode ratesNode = rootNode.get("rates");
+
+            if (ratesNode == null) {
+                throw new IllegalArgumentException("Invalid API response: 'rates' field not found.");
+            }
+
+            Map<String, Double> exchangeRates = new HashMap<>();
+            ratesNode.fields().forEachRemaining(entry -> exchangeRates.put(entry.getKey(), entry.getValue().asDouble()));
+
+            logger.info("Fetched and processed exchange rates successfully.");
+            return exchangeRates;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching or processing exchange rates: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to fetch exchange rates from an external API
+    public static String fetchExchangeRatesFromApi(String apiUrl) throws IOException {
+        try {
+            return Request.get(apiUrl).execute().returnContent().asString();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error fetching exchange rates from API: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hc.client5.http.fluent.Request;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(BufferedReader file) throws IOException {
+        try {
+            String line;
+            int recordCount = 0;
+            String previousAccountId = null;
+            double totalInterest = 0.0;
+
+            while ((line = file.readLine()) != null) {
+                recordCount++;
+                // Simulate processing logic
+                String currentAccountId = "mockAccountId"; // Replace with actual logic to extract account ID
+                if (!currentAccountId.equals(previousAccountId)) {
+                    if (previousAccountId != null) {
+                        // Update account with accumulated interest
+                        logger.info("Updating account " + previousAccountId + " with interest: " + totalInterest);
+                    }
+                    totalInterest = 0.0;
+                    previousAccountId = currentAccountId;
+                }
+                // Simulate interest calculation
+                totalInterest += 10.0; // Replace with actual interest calculation logic
+            }
+            logger.info("Processed " + recordCount + " records.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing records: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountAndXRefData(String accountId, Map<String, String> accountData, Map<String, String> xRefData) {
+        try {
+            String accountInfo = accountData.get(accountId);
+            String xRefInfo = xRefData.get(accountId);
+
+            if (accountInfo == null || xRefInfo == null) {
+                throw new IllegalArgumentException("Data not found for account ID: " + accountId);
+            }
+            logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error retrieving data: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        try {
+            double interest = (transactionBalance * interestRate) / 1200;
+            logger.info("Calculated monthly interest: " + interest);
+            return interest;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error calculating interest: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest, Map<String, Double> accountBalances) {
+        try {
+            double currentBalance = accountBalances.getOrDefault(accountId, 0.0);
+            currentBalance += accumulatedInterest;
+            accountBalances.put(accountId, currentBalance);
+            logger.info("Updated account balance for account ID: " + accountId + " to " + currentBalance);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error updating account balances: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        try {
+            // Simulate transaction record creation
+            logger.info("Created transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error creating transaction record: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchAndProcessExchangeRates(String apiResponse) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode ratesNode = rootNode.get("rates");
+
+            if (ratesNode == null) {
+                throw new IllegalArgumentException("Invalid API response: 'rates' field not found.");
+            }
+
+            Map<String, Double> exchangeRates = new HashMap<>();
+            ratesNode.fields().forEachRemaining(entry -> exchangeRates.put(entry.getKey(), entry.getValue().asDouble()));
+
+            logger.info("Fetched and processed exchange rates successfully.");
+            return exchangeRates;
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Error fetching or processing exchange rates: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to fetch exchange rates from an external API
+    public static String fetchExchangeRatesFromApi(String apiUrl) throws IOException {
+        try {
+            return Request.get(apiUrl).execute().returnContent().asString();
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error fetching exchange rates from API: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hc.client5.http.fluent.Request;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from a file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = extractAccountId(line);
+            if (lastAccountId != null && !lastAccountId.equals(currentAccountId)) {
+                // Simulate updating account with accumulated interest
+                updateAccountWithInterest(lastAccountId, totalInterest);
+                totalInterest = 0.0;
+            }
+            totalInterest += calculateInterest(line);
+            lastAccountId = currentAccountId;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountWithInterest(lastAccountId, totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Helper method to extract account ID from a record
+    private static String extractAccountId(String record) {
+        // Simulate extracting account ID from the record
+        return record.split(" ")[0];
+    }
+
+    // Helper method to calculate interest for a record
+    private static double calculateInterest(String record) {
+        // Simulate interest calculation
+        return 10.0; // Placeholder value
+    }
+
+    // Helper method to update account with accumulated interest
+    private static void updateAccountWithInterest(String accountId, double totalInterest) {
+        // Simulate updating account
+        logger.info("Updated account " + accountId + " with interest: " + totalInterest);
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountAndXRefData(String accountId, Map<String, String> accountData, Map<String, String> xRefData) {
+        String accountInfo = accountData.get(accountId);
+        String xRefInfo = xRefData.get(accountId);
+
+        if (accountInfo == null || xRefInfo == null) {
+            logger.warning("Account or Cross-Reference data not found for account ID: " + accountId);
+        } else {
+            logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest, Map<String, Double> accountBalances) {
+        Double currentBalance = accountBalances.get(accountId);
+        if (currentBalance == null) {
+            logger.warning("Account balance not found for account ID: " + accountId);
+            return;
+        }
+
+        double updatedBalance = currentBalance + accumulatedInterest;
+        accountBalances.put(accountId, updatedBalance);
+        logger.info("Updated balance for account ID " + accountId + ": " + updatedBalance);
+    }
+
+    // Method to create a transaction record
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        // Simulate creating a transaction record
+        logger.info("Created transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchAndProcessExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode ratesNode = rootNode.get("rates");
+
+            if (ratesNode != null) {
+                Iterator<Map.Entry<String, JsonNode>> fields = ratesNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fields.next();
+                    exchangeRates.put(field.getKey(), field.getValue().asDouble());
+                }
+            }
+
+            logger.info("Fetched and processed exchange rates successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing exchange rates: " + e.getMessage(), e);
+            throw e;
+        }
+
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.hc.client5.http.fluent.Request;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from a file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = extractAccountId(line);
+            if (lastAccountId != null && !lastAccountId.equals(currentAccountId)) {
+                // Simulate updating account with accumulated interest
+                updateAccountWithInterest(lastAccountId, totalInterest);
+                totalInterest = 0.0;
+            }
+            totalInterest += calculateInterest(line);
+            lastAccountId = currentAccountId;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountWithInterest(lastAccountId, totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Helper method to extract account ID from a record
+    private static String extractAccountId(String record) {
+        // Simulate extracting account ID from the record
+        return record.split(" ")[0];
+    }
+
+    // Helper method to calculate interest for a record
+    private static double calculateInterest(String record) {
+        // Simulate interest calculation
+        return 10.0; // Placeholder value
+    }
+
+    // Helper method to update account with accumulated interest
+    private static void updateAccountWithInterest(String accountId, double totalInterest) {
+        // Simulate updating account
+        logger.info("Updated account " + accountId + " with interest: " + totalInterest);
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountAndXRefData(String accountId, Map<String, String> accountData, Map<String, String> xRefData) {
+        String accountInfo = accountData.get(accountId);
+        String xRefInfo = xRefData.get(accountId);
+
+        if (accountInfo == null || xRefInfo == null) {
+            logger.warning("Account or Cross-Reference data not found for account ID: " + accountId);
+        } else {
+            logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest, Map<String, Double> accountBalances) {
+        Double currentBalance = accountBalances.get(accountId);
+        if (currentBalance == null) {
+            logger.warning("Account balance not found for account ID: " + accountId);
+            return;
+        }
+
+        double updatedBalance = currentBalance + accumulatedInterest;
+        accountBalances.put(accountId, updatedBalance);
+        logger.info("Updated balance for account ID " + accountId + ": " + updatedBalance);
+    }
+
+    // Method to create a transaction record
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        // Simulate creating a transaction record
+        logger.info("Created transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchAndProcessExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(apiResponse);
+            JsonNode ratesNode = rootNode.get("rates");
+
+            if (ratesNode != null) {
+                Iterator<Map.Entry<String, JsonNode>> fields = ratesNode.fields();
+                while (fields.hasNext()) {
+                    Map.Entry<String, JsonNode> field = fields.next();
+                    exchangeRates.put(field.getKey(), field.getValue().asDouble());
+                }
+            }
+
+            logger.info("Fetched and processed exchange rates successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing exchange rates: " + e.getMessage(), e);
+            throw e;
+        }
+
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+
+            String line;
+            while ((line = file.readLine()) != null) {
+                // Simulate processing each record
+                logger.info("Processing record: " + line);
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing records: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to retrieve account data
+    public static Map<String, String> retrieveAccountData(String accountId) {
+        // Simulate fetching account data
+        Map<String, String> accountData = new HashMap<>();
+        accountData.put("accountId", accountId);
+        accountData.put("balance", "1000.0");
+        logger.info("Retrieved account data for accountId: " + accountId);
+        return accountData;
+    }
+
+    // Method to retrieve cross-reference data
+    public static Map<String, String> retrieveXrefData(String accountId) {
+        // Simulate fetching cross-reference data
+        Map<String, String> xrefData = new HashMap<>();
+        xrefData.put("accountId", accountId);
+        xrefData.put("groupCode", "DEFAULT");
+        logger.info("Retrieved cross-reference data for accountId: " + accountId);
+        return xrefData;
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + interest);
+        return interest;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalance(String accountId, double accumulatedInterest) {
+        // Simulate updating account balance
+        logger.info("Updated account balance for accountId: " + accountId + " with interest: " + accumulatedInterest);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        // Simulate creating a transaction record
+        logger.info("Created transaction record: Description=" + description + ", Amount=" + amount + ", Timestamp=" + timestamp);
+    }
+
+    // Configure logger to log to console
+    static {
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.ALL);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(Level.ALL);
+        logger.setUseParentHandlers(false);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() == null) {
+                    throw new IOException("File " + entry.getKey() + " could not be opened.");
+                }
+            }
+            logger.info("All files opened successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error opening files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        try {
+            for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            }
+            logger.info("All files closed successfully.");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error closing files: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+
+            String line;
+            while ((line = file.readLine()) != null) {
+                // Simulate processing each record
+                logger.info("Processing record: " + line);
+            }
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Error processing records: " + e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    // Method to retrieve account data
+    public static Map<String, String> retrieveAccountData(String accountId) {
+        // Simulate fetching account data
+        Map<String, String> accountData = new HashMap<>();
+        accountData.put("accountId", accountId);
+        accountData.put("balance", "1000.0");
+        logger.info("Retrieved account data for accountId: " + accountId);
+        return accountData;
+    }
+
+    // Method to retrieve cross-reference data
+    public static Map<String, String> retrieveXrefData(String accountId) {
+        // Simulate fetching cross-reference data
+        Map<String, String> xrefData = new HashMap<>();
+        xrefData.put("accountId", accountId);
+        xrefData.put("groupCode", "DEFAULT");
+        logger.info("Retrieved cross-reference data for accountId: " + accountId);
+        return xrefData;
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + interest);
+        return interest;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalance(String accountId, double accumulatedInterest) {
+        // Simulate updating account balance
+        logger.info("Updated account balance for accountId: " + accountId + " with interest: " + accumulatedInterest);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        // Simulate creating a transaction record
+        logger.info("Created transaction record: Description=" + description + ", Amount=" + amount + ", Timestamp=" + timestamp);
+    }
+
+    // Configure logger to log to console
+    static {
+        ConsoleHandler consoleHandler = new ConsoleHandler();
+        consoleHandler.setLevel(Level.ALL);
+        logger.addHandler(consoleHandler);
+        logger.setLevel(Level.ALL);
+        logger.setUseParentHandlers(false);
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.severe("Error closing file " + entry.getKey() + ": " + e.getMessage());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        while ((line = file.readLine()) != null) {
+            // Simulate processing each record
+            logger.info("Processing record: " + line);
+        }
+    }
+
+    // Retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        // Simulate fetching data
+        data.put("accountId", accountId);
+        data.put("xrefData", "mockXrefData");
+        logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        return data;
+    }
+
+    // Calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + interest);
+        return interest;
+    }
+
+    // Update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        // Simulate updating account balances
+        logger.info("Updated account balance for account ID: " + accountId + " with accumulated interest: " + accumulatedInterest);
+    }
+
+    // Create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount) {
+        // Simulate creating transaction record
+        logger.info("Created transaction record: Description = " + description + ", Amount = " + amount);
+    }
+
+    // Fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+        Map<String, Double> exchangeRates = new HashMap<>();
+
+        if (responseMap.containsKey("rates")) {
+            Map<String, Object> rates = (Map<String, Object>) responseMap.get("rates");
+            for (Map.Entry<String, Object> entry : rates.entrySet()) {
+                exchangeRates.put(entry.getKey(), Double.parseDouble(entry.getValue().toString()));
+            }
+        }
+
+        logger.info("Fetched and processed currency exchange rates.");
+        return exchangeRates;
+    }
+
+    // Fetch currency exchange rates from external API (actual HTTP call)
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromApi(String apiUrl) throws IOException {
+        URL url = new URL(apiUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode != 200) {
+            throw new IOException("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        StringBuilder responseBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            responseBuilder.append(line);
+        }
+        reader.close();
+
+        return fetchCurrencyExchangeRates(responseBuilder.toString());
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.severe("Error closing file " + entry.getKey() + ": " + e.getMessage());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        while ((line = file.readLine()) != null) {
+            // Simulate processing each record
+            logger.info("Processing record: " + line);
+        }
+    }
+
+    // Retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        // Simulate fetching data
+        data.put("accountId", accountId);
+        data.put("xrefData", "mockXrefData");
+        logger.info("Retrieved account and cross-reference data for account ID: " + accountId);
+        return data;
+    }
+
+    // Calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + interest);
+        return interest;
+    }
+
+    // Update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        // Simulate updating account balances
+        logger.info("Updated account balance for account ID: " + accountId + " with accumulated interest: " + accumulatedInterest);
+    }
+
+    // Create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount) {
+        // Simulate creating transaction record
+        logger.info("Created transaction record: Description = " + description + ", Amount = " + amount);
+    }
+
+    // Fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+        Map<String, Double> exchangeRates = new HashMap<>();
+
+        if (responseMap.containsKey("rates")) {
+            Map<String, Object> rates = (Map<String, Object>) responseMap.get("rates");
+            for (Map.Entry<String, Object> entry : rates.entrySet()) {
+                exchangeRates.put(entry.getKey(), Double.parseDouble(entry.getValue().toString()));
+            }
+        }
+
+        logger.info("Fetched and processed currency exchange rates.");
+        return exchangeRates;
+    }
+
+    // Fetch currency exchange rates from external API (actual HTTP call)
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromApi(String apiUrl) throws IOException {
+        URL url = new URL(apiUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+
+        int responseCode = connection.getResponseCode();
+        if (responseCode != 200) {
+            throw new IOException("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        StringBuilder responseBuilder = new StringBuilder();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            responseBuilder.append(line);
+        }
+        reader.close();
+
+        return fetchCurrencyExchangeRates(responseBuilder.toString());
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Error closing file " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            // Simulate record processing
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+            double interestRate = Double.parseDouble(record[2]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    updateAccountBalances(lastAccountId, totalInterest);
+                }
+                lastAccountId = accountId;
+                totalInterest = 0.0;
+            }
+
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+            recordCount++;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountBalances(lastAccountId, totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        // Simulate fetching data
+        data.put("accountId", accountId);
+        data.put("accountName", "Mock Account");
+        data.put("xrefData", "Mock Cross-Reference Data");
+        return data;
+    }
+
+    // Calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        // Simulate updating account balances
+        logger.info("Updated account " + accountId + " with accumulated interest: " + accumulatedInterest);
+    }
+
+    // Create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount) {
+        // Simulate creating transaction record
+        logger.info("Created transaction record: " + description + ", Amount: " + amount);
+    }
+
+    // Fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(apiResponse, JsonObject.class);
+            JsonObject rates = jsonObject.getAsJsonObject("rates");
+
+            for (Map.Entry<String, JsonElement> entry : rates.entrySet()) {
+                exchangeRates.put(entry.getKey(), entry.getValue().getAsDouble());
+            }
+        } catch (Exception e) {
+            logger.severe("Error parsing currency exchange rates: " + e.getMessage());
+        }
+        return exchangeRates;
+    }
+
+    // Fetch currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromAPI(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                exchangeRates = fetchCurrencyExchangeRates(response.toString());
+            } else {
+                logger.severe("Failed to fetch currency exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (IOException e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Error closing file " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            // Simulate record processing
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+            double interestRate = Double.parseDouble(record[2]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    updateAccountBalances(lastAccountId, totalInterest);
+                }
+                lastAccountId = accountId;
+                totalInterest = 0.0;
+            }
+
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+            recordCount++;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountBalances(lastAccountId, totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        // Simulate fetching data
+        data.put("accountId", accountId);
+        data.put("accountName", "Mock Account");
+        data.put("xrefData", "Mock Cross-Reference Data");
+        return data;
+    }
+
+    // Calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        // Simulate updating account balances
+        logger.info("Updated account " + accountId + " with accumulated interest: " + accumulatedInterest);
+    }
+
+    // Create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount) {
+        // Simulate creating transaction record
+        logger.info("Created transaction record: " + description + ", Amount: " + amount);
+    }
+
+    // Fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(apiResponse, JsonObject.class);
+            JsonObject rates = jsonObject.getAsJsonObject("rates");
+
+            for (Map.Entry<String, JsonElement> entry : rates.entrySet()) {
+                exchangeRates.put(entry.getKey(), entry.getValue().getAsDouble());
+            }
+        } catch (Exception e) {
+            logger.severe("Error parsing currency exchange rates: " + e.getMessage());
+        }
+        return exchangeRates;
+    }
+
+    // Fetch currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromAPI(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                exchangeRates = fetchCurrencyExchangeRates(response.toString());
+            } else {
+                logger.severe("Failed to fetch currency exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (IOException e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import org.json.JSONObject;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.severe("Error closing file " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        while ((line = file.readLine()) != null) {
+            // Simulate processing each record
+            logger.info("Processing record: " + line);
+        }
+    }
+
+    // Retrieve Account and Cross-Reference Data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        try {
+            // Simulate fetching data
+            data.put("accountId", accountId);
+            data.put("xrefData", "mockXrefData");
+            logger.info("Retrieved data for account ID: " + accountId);
+        } catch (Exception e) {
+            logger.severe("Error retrieving data for account ID " + accountId + ": " + e.getMessage());
+        }
+        return data;
+    }
+
+    // Calculate Monthly Interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated interest: " + interest);
+        return interest;
+    }
+
+    // Update Account Balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        try {
+            // Simulate updating account balances
+            logger.info("Updating account " + accountId + " with accumulated interest: " + accumulatedInterest);
+        } catch (Exception e) {
+            logger.severe("Error updating account " + accountId + ": " + e.getMessage());
+        }
+    }
+
+    // Create Transaction Records for Calculated Interest
+    public static void createTransactionRecord(String description, double amount) {
+        try {
+            // Simulate creating transaction record
+            logger.info("Creating transaction record: " + description + ", Amount: " + amount);
+        } catch (Exception e) {
+            logger.severe("Error creating transaction record: " + e.getMessage());
+        }
+    }
+
+    // Fetch and Process Currency Exchange Rates from External API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            // Parse JSON response
+            JSONObject jsonObject = new JSONObject(apiResponse);
+            JSONObject rates = jsonObject.getJSONObject("rates");
+
+            for (String key : rates.keySet()) {
+                exchangeRates.put(key, rates.getDouble(key));
+            }
+
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+        }
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import org.json.JSONObject;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("File " + entry.getKey() + " could not be opened.");
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.severe("Error closing file " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null.");
+        }
+
+        String line;
+        while ((line = file.readLine()) != null) {
+            // Simulate processing each record
+            logger.info("Processing record: " + line);
+        }
+    }
+
+    // Retrieve Account and Cross-Reference Data
+    public static Map<String, String> retrieveAccountAndXrefData(String accountId) {
+        Map<String, String> data = new HashMap<>();
+        try {
+            // Simulate fetching data
+            data.put("accountId", accountId);
+            data.put("xrefData", "mockXrefData");
+            logger.info("Retrieved data for account ID: " + accountId);
+        } catch (Exception e) {
+            logger.severe("Error retrieving data for account ID " + accountId + ": " + e.getMessage());
+        }
+        return data;
+    }
+
+    // Calculate Monthly Interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double interest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated interest: " + interest);
+        return interest;
+    }
+
+    // Update Account Balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        try {
+            // Simulate updating account balances
+            logger.info("Updating account " + accountId + " with accumulated interest: " + accumulatedInterest);
+        } catch (Exception e) {
+            logger.severe("Error updating account " + accountId + ": " + e.getMessage());
+        }
+    }
+
+    // Create Transaction Records for Calculated Interest
+    public static void createTransactionRecord(String description, double amount) {
+        try {
+            // Simulate creating transaction record
+            logger.info("Creating transaction record: " + description + ", Amount: " + amount);
+        } catch (Exception e) {
+            logger.severe("Error creating transaction record: " + e.getMessage());
+        }
+    }
+
+    // Fetch and Process Currency Exchange Rates from External API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            // Parse JSON response
+            JSONObject jsonObject = new JSONObject(apiResponse);
+            JSONObject rates = jsonObject.getJSONObject("rates");
+
+            for (String key : rates.keySet()) {
+                exchangeRates.put(key, rates.getDouble(key));
+            }
+
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+        }
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] fields = line.split(",");
+            String accountId = fields[0];
+            double transactionBalance = Double.parseDouble(fields[1]);
+            double interestRate = Double.parseDouble(fields[2]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    updateAccount(new HashMap<>(), totalInterest);
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            updateAccount(new HashMap<>(), totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        if (accountData.isEmpty() || xrefData.isEmpty()) {
+            logger.warning("Account or cross-reference data is missing.");
+        } else {
+            logger.info("Account and cross-reference data retrieved successfully.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.getOrDefault("balance", "0"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        account.put("currentCycleCredit", "0");
+        account.put("currentCycleDebit", "0");
+        logger.info("Account updated successfully.");
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        transaction.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        logger.info("Transaction record created: " + transaction);
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+        Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+        logger.info("Exchange rates fetched successfully.");
+        return rates;
+    }
+
+    // Method to fetch exchange rates from an external API
+    public static Map<String, Double> fetchExchangeRatesFromApi(String apiUrl) throws IOException {
+        Map<String, Double> rates = new HashMap<>();
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                rates = fetchExchangeRates(response.toString());
+            } else {
+                logger.warning("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (IOException e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return rates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] fields = line.split(",");
+            String accountId = fields[0];
+            double transactionBalance = Double.parseDouble(fields[1]);
+            double interestRate = Double.parseDouble(fields[2]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    updateAccount(new HashMap<>(), totalInterest);
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            updateAccount(new HashMap<>(), totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        if (accountData.isEmpty() || xrefData.isEmpty()) {
+            logger.warning("Account or cross-reference data is missing.");
+        } else {
+            logger.info("Account and cross-reference data retrieved successfully.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.getOrDefault("balance", "0"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        account.put("currentCycleCredit", "0");
+        account.put("currentCycleDebit", "0");
+        logger.info("Account updated successfully.");
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        transaction.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        logger.info("Transaction record created: " + transaction);
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+        Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+        logger.info("Exchange rates fetched successfully.");
+        return rates;
+    }
+
+    // Method to fetch exchange rates from an external API
+    public static Map<String, Double> fetchExchangeRatesFromApi(String apiUrl) throws IOException {
+        Map<String, Double> rates = new HashMap<>();
+        try {
+            URL url = new URL(apiUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+                rates = fetchExchangeRates(response.toString());
+            } else {
+                logger.warning("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (IOException e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return rates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String[] fields = line.split(",");
+            String accountId = fields[0]; // Assuming accountId is the first field
+            double transactionBalance = Double.parseDouble(fields[1]); // Assuming balance is the second field
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Update account with accumulated interest
+                    updateAccount(new HashMap<>(), totalInterest);
+                }
+                lastAccountId = accountId;
+                totalInterest = 0;
+            }
+
+            double interestRate = 5; // Mock interest rate
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccount(new HashMap<>(), totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account and cross-reference data successfully.");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        // Simulate account update logic
+        double currentBalance = Double.parseDouble(account.getOrDefault("balance", "0"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance successfully.");
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        // Simulate transaction record creation logic
+        logger.info("Created transaction record successfully.");
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) {
+        Map<String, Double> rates = new HashMap<>();
+        try {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(apiResponse, JsonObject.class);
+            JsonObject ratesObject = jsonObject.getAsJsonObject("rates");
+
+            for (Map.Entry<String, JsonElement> entry : ratesObject.entrySet()) {
+                rates.put(entry.getKey(), entry.getValue().getAsDouble());
+            }
+
+            logger.info("Fetched and processed currency exchange rates successfully.");
+        } catch (Exception e) {
+            logger.severe("Failed to fetch or process currency exchange rates: " + e.getMessage());
+        }
+        return rates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey());
+                throw e;
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String[] fields = line.split(",");
+            String accountId = fields[0]; // Assuming accountId is the first field
+            double transactionBalance = Double.parseDouble(fields[1]); // Assuming balance is the second field
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Update account with accumulated interest
+                    updateAccount(new HashMap<>(), totalInterest);
+                }
+                lastAccountId = accountId;
+                totalInterest = 0;
+            }
+
+            double interestRate = 5; // Mock interest rate
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccount(new HashMap<>(), totalInterest);
+        }
+
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account and cross-reference data successfully.");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        // Simulate account update logic
+        double currentBalance = Double.parseDouble(account.getOrDefault("balance", "0"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance successfully.");
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        // Simulate transaction record creation logic
+        logger.info("Created transaction record successfully.");
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) {
+        Map<String, Double> rates = new HashMap<>();
+        try {
+            Gson gson = new Gson();
+            JsonObject jsonObject = gson.fromJson(apiResponse, JsonObject.class);
+            JsonObject ratesObject = jsonObject.getAsJsonObject("rates");
+
+            for (Map.Entry<String, JsonElement> entry : ratesObject.entrySet()) {
+                rates.put(entry.getKey(), entry.getValue().getAsDouble());
+            }
+
+            logger.info("Fetched and processed currency exchange rates successfully.");
+        } catch (Exception e) {
+            logger.severe("Failed to fetch or process currency exchange rates: " + e.getMessage());
+        }
+        return rates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey() + " - " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from TCATBAL-FILE
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = "mockAccountId"; // Replace with actual logic to extract account ID
+            if (!currentAccountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Update account with accumulated interest
+                    logger.info("Updating account " + lastAccountId + " with interest: " + totalInterest);
+                }
+                lastAccountId = currentAccountId;
+                totalInterest = 0.0;
+            }
+            // Simulate interest calculation
+            totalInterest += 10.0; // Replace with actual interest calculation logic
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.get("balance"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance: " + currentBalance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        // Simulate transaction record creation
+        logger.info("Created transaction record: " + transaction);
+    }
+
+    // Method to handle file operation errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, new TypeReference<Map<String, Object>>() {});
+        Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+        logger.info("Fetched exchange rates: " + rates);
+        return rates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.type.TypeReference;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey() + " - " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from TCATBAL-FILE
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = "mockAccountId"; // Replace with actual logic to extract account ID
+            if (!currentAccountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Update account with accumulated interest
+                    logger.info("Updating account " + lastAccountId + " with interest: " + totalInterest);
+                }
+                lastAccountId = currentAccountId;
+                totalInterest = 0.0;
+            }
+            // Simulate interest calculation
+            totalInterest += 10.0; // Replace with actual interest calculation logic
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.get("balance"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance: " + currentBalance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        // Simulate transaction record creation
+        logger.info("Created transaction record: " + transaction);
+    }
+
+    // Method to handle file operation errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> responseMap = objectMapper.readValue(apiResponse, new TypeReference<Map<String, Object>>() {});
+        Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+        logger.info("Fetched exchange rates: " + rates);
+        return rates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey() + " - " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = "mockAccountId"; // Replace with actual parsing logic
+            if (!currentAccountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Simulate updating account with accumulated interest
+                    logger.info("Updating account " + lastAccountId + " with interest: " + totalInterest);
+                }
+                lastAccountId = currentAccountId;
+                totalInterest = 0.0;
+            }
+            totalInterest += 10.0; // Simulate interest calculation
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate fetching data
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.get("balance"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance: " + currentBalance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        logger.info("Created transaction record: " + transaction);
+    }
+
+    // Method to handle file operation errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            JsonObject jsonObject = JsonParser.parseString(apiResponse).getAsJsonObject();
+            JsonObject rates = jsonObject.getAsJsonObject("rates");
+            for (String currency : rates.keySet()) {
+                exchangeRates.put(currency, rates.get(currency).getAsDouble());
+            }
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (JsonSyntaxException e) {
+            logger.severe("Failed to parse JSON response: " + e.getMessage());
+            throw new IOException("Invalid JSON response", e);
+        }
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.*;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+        logger.info("All files opened successfully.");
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                if (entry.getValue() != null) {
+                    entry.getValue().close();
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to close file: " + entry.getKey() + " - " + e.getMessage());
+            }
+        }
+        logger.info("All files closed successfully.");
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String currentAccountId = "mockAccountId"; // Replace with actual parsing logic
+            if (!currentAccountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Simulate updating account with accumulated interest
+                    logger.info("Updating account " + lastAccountId + " with interest: " + totalInterest);
+                }
+                lastAccountId = currentAccountId;
+                totalInterest = 0.0;
+            }
+            totalInterest += 10.0; // Simulate interest calculation
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate fetching data
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccount(Map<String, String> account, double accumulatedInterest) {
+        double currentBalance = Double.parseDouble(account.get("balance"));
+        currentBalance += accumulatedInterest;
+        account.put("balance", String.valueOf(currentBalance));
+        logger.info("Updated account balance: " + currentBalance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transaction) {
+        logger.info("Created transaction record: " + transaction);
+    }
+
+    // Method to handle file operation errors
+    public static void handleFileError(IOException e) {
+        logger.severe("File operation error: " + e.getMessage());
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Logger logger, String errorMessage) {
+        logger.severe("Error: " + errorMessage);
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            JsonObject jsonObject = JsonParser.parseString(apiResponse).getAsJsonObject();
+            JsonObject rates = jsonObject.getAsJsonObject("rates");
+            for (String currency : rates.keySet()) {
+                exchangeRates.put(currency, rates.get(currency).getAsDouble());
+            }
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (JsonSyntaxException e) {
+            logger.severe("Failed to parse JSON response: " + e.getMessage());
+            throw new IOException("Invalid JSON response", e);
+        }
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double accumulatedInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    logger.info("Updating account: " + previousAccountId + " with accumulated interest: " + accumulatedInterest);
+                    accumulatedInterest = 0.0;
+                }
+                previousAccountId = accountId;
+            }
+
+            accumulatedInterest += transactionBalance * 0.05 / 1200; // Example interest calculation
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        try {
+            // Simulate data retrieval logic
+            logger.info("Retrieved account data: " + accountData);
+            logger.info("Retrieved cross-reference data: " + xrefData);
+        } catch (Exception e) {
+            logger.severe("Error retrieving data: " + e.getMessage());
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        try {
+            for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+                double updatedBalance = entry.getValue() + 100.0; // Example accumulated interest
+                accountData.put(entry.getKey(), updatedBalance);
+                logger.info("Updated account: " + entry.getKey() + " with new balance: " + updatedBalance);
+            }
+        } catch (Exception e) {
+            logger.severe("Error updating account balances: " + e.getMessage());
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        try {
+            // Simulate transaction record creation
+            logger.info("Created transaction record: " + transactionData);
+        } catch (Exception e) {
+            logger.severe("Error creating transaction records: " + e.getMessage());
+        }
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            exchangeRates = objectMapper.readValue(apiResponse, Map.class);
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+
+    // Method to fetch currency exchange rates from an external API
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromAPI(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(apiUrl)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            String responseBody = response.body().string();
+            ObjectMapper objectMapper = new ObjectMapper();
+            exchangeRates = objectMapper.readValue(responseBody, Map.class);
+            logger.info("Fetched exchange rates from API: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates from API: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double accumulatedInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    logger.info("Updating account: " + previousAccountId + " with accumulated interest: " + accumulatedInterest);
+                    accumulatedInterest = 0.0;
+                }
+                previousAccountId = accountId;
+            }
+
+            accumulatedInterest += transactionBalance * 0.05 / 1200; // Example interest calculation
+        }
+        logger.info("Processed " + recordCount + " records.");
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        try {
+            // Simulate data retrieval logic
+            logger.info("Retrieved account data: " + accountData);
+            logger.info("Retrieved cross-reference data: " + xrefData);
+        } catch (Exception e) {
+            logger.severe("Error retrieving data: " + e.getMessage());
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        try {
+            for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+                double updatedBalance = entry.getValue() + 100.0; // Example accumulated interest
+                accountData.put(entry.getKey(), updatedBalance);
+                logger.info("Updated account: " + entry.getKey() + " with new balance: " + updatedBalance);
+            }
+        } catch (Exception e) {
+            logger.severe("Error updating account balances: " + e.getMessage());
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        try {
+            // Simulate transaction record creation
+            logger.info("Created transaction record: " + transactionData);
+        } catch (Exception e) {
+            logger.severe("Error creating transaction records: " + e.getMessage());
+        }
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            exchangeRates = objectMapper.readValue(apiResponse, Map.class);
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+
+    // Method to fetch currency exchange rates from an external API
+    public static Map<String, Double> fetchCurrencyExchangeRatesFromAPI(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(apiUrl)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            String responseBody = response.body().string();
+            ObjectMapper objectMapper = new ObjectMapper();
+            exchangeRates = objectMapper.readValue(responseBody, Map.class);
+            logger.info("Fetched exchange rates from API: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates from API: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from a file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        while ((line = file.readLine()) != null) {
+            logger.info("Processing record: " + line);
+            // Simulate processing logic
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        logger.info("Retrieving account data: " + accountData);
+        logger.info("Retrieving cross-reference data: " + xrefData);
+        // Simulate retrieval logic
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double monthlyInterest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + monthlyInterest);
+        return monthlyInterest;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double updatedBalance = entry.getValue() + 100; // Simulate adding accumulated interest
+            accountData.put(entry.getKey(), updatedBalance);
+            logger.info("Updated account balance for " + entry.getKey() + ": " + updatedBalance);
+        }
+    }
+
+    // Method to create transaction records
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Creating transaction record: " + transactionData);
+        // Simulate transaction record creation
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+            Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+            exchangeRates.putAll(rates);
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.fasterxml.jackson.databind.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from a file
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        while ((line = file.readLine()) != null) {
+            logger.info("Processing record: " + line);
+            // Simulate processing logic
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        logger.info("Retrieving account data: " + accountData);
+        logger.info("Retrieving cross-reference data: " + xrefData);
+        // Simulate retrieval logic
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        double monthlyInterest = (transactionBalance * interestRate) / 1200;
+        logger.info("Calculated monthly interest: " + monthlyInterest);
+        return monthlyInterest;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double updatedBalance = entry.getValue() + 100; // Simulate adding accumulated interest
+            accountData.put(entry.getKey(), updatedBalance);
+            logger.info("Updated account balance for " + entry.getKey() + ": " + updatedBalance);
+        }
+    }
+
+    // Method to create transaction records
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Creating transaction record: " + transactionData);
+        // Simulate transaction record creation
+    }
+
+    // Method to fetch and process currency exchange rates from an external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiResponse) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> responseMap = objectMapper.readValue(apiResponse, Map.class);
+            Map<String, Double> rates = (Map<String, Double>) responseMap.get("rates");
+            exchangeRates.putAll(rates);
+            logger.info("Fetched exchange rates: " + exchangeRates);
+        } catch (Exception e) {
+            logger.severe("Error fetching currency exchange rates: " + e.getMessage());
+            throw e;
+        }
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.google.gson.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    logger.info("Updating account " + lastAccountId + " with accumulated interest: " + totalInterest);
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Mock interest rate
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            logger.info("Updating account " + lastAccountId + " with accumulated interest: " + totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double newBalance = entry.getValue() + 100.0; // Mock accumulated interest
+            accountData.put(entry.getKey(), newBalance);
+            logger.info("Updated account " + entry.getKey() + " with new balance: " + newBalance);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Created transaction record: " + transactionData);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiUrl) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(apiUrl).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            String responseBody = response.body().string();
+            Gson gson = new Gson();
+            Map<String, Double> exchangeRates = gson.fromJson(responseBody, Map.class);
+
+            logger.info("Fetched exchange rates: " + exchangeRates);
+            return exchangeRates;
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        }
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import com.google.gson.*;
+import okhttp3.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    logger.info("Updating account " + lastAccountId + " with accumulated interest: " + totalInterest);
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Mock interest rate
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            logger.info("Updating account " + lastAccountId + " with accumulated interest: " + totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double newBalance = entry.getValue() + 100.0; // Mock accumulated interest
+            accountData.put(entry.getKey(), newBalance);
+            logger.info("Updated account " + entry.getKey() + " with new balance: " + newBalance);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Created transaction record: " + transactionData);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiUrl) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder().url(apiUrl).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected code " + response);
+            }
+
+            String responseBody = response.body().string();
+            Gson gson = new Gson();
+            Map<String, Double> exchangeRates = gson.fromJson(responseBody, Map.class);
+
+            logger.info("Fetched exchange rates: " + exchangeRates);
+            return exchangeRates;
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        }
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    // Update account with accumulated interest
+                    logger.info("Updating account: " + previousAccountId + " with interest: " + totalInterest);
+                }
+                previousAccountId = accountId;
+                totalInterest = 0.0;
+            }
+
+            // Simulate interest calculation
+            double interestRate = 5.0; // Mock interest rate
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (previousAccountId != null) {
+            logger.info("Updating account: " + previousAccountId + " with interest: " + totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double updatedBalance = entry.getValue() + 100.0; // Mock accumulated interest
+            logger.info("Updated account: " + entry.getKey() + " with new balance: " + updatedBalance);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Created transaction record: " + transactionData);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(apiUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                // Parse JSON response
+                JSONObject jsonResponse = new JSONObject(response.toString());
+                for (String key : jsonResponse.keySet()) {
+                    exchangeRates.put(key, jsonResponse.getDouble(key));
+                }
+            } else {
+                logger.severe("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return exchangeRates;
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import org.json.JSONObject;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                // Simulate opening files (already provided as BufferedReader in the test)
+                logger.info("Opened file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error opening file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            try {
+                entry.getValue().close();
+                logger.info("Closed file: " + entry.getKey());
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    // Update account with accumulated interest
+                    logger.info("Updating account: " + previousAccountId + " with interest: " + totalInterest);
+                }
+                previousAccountId = accountId;
+                totalInterest = 0.0;
+            }
+
+            // Simulate interest calculation
+            double interestRate = 5.0; // Mock interest rate
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (previousAccountId != null) {
+            logger.info("Updating account: " + previousAccountId + " with interest: " + totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveAccountData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        logger.info("Retrieved account data: " + accountData);
+        logger.info("Retrieved cross-reference data: " + xrefData);
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            double updatedBalance = entry.getValue() + 100.0; // Mock accumulated interest
+            logger.info("Updated account: " + entry.getKey() + " with new balance: " + updatedBalance);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        logger.info("Created transaction record: " + transactionData);
+    }
+
+    // Method to fetch and process currency exchange rates from external API
+    public static Map<String, Double> fetchCurrencyExchangeRates(String apiUrl) throws IOException {
+        Map<String, Double> exchangeRates = new HashMap<>();
+        HttpURLConnection connection = null;
+
+        try {
+            URL url = new URL(apiUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                StringBuilder response = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                // Parse JSON response
+                JSONObject jsonResponse = new JSONObject(response.toString());
+                for (String key : jsonResponse.keySet()) {
+                    exchangeRates.put(key, jsonResponse.getDouble(key));
+                }
+            } else {
+                logger.severe("Failed to fetch exchange rates. HTTP response code: " + responseCode);
+            }
+        } catch (Exception e) {
+            logger.severe("Error fetching exchange rates: " + e.getMessage());
+            throw e;
+        } finally {
+            if (connection != null) {
+                connection.disconnect();
+            }
+        }
+
+        return exchangeRates;
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader != null) {
+                fileReader.close();
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double accumulatedInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] recordFields = line.split(",");
+            String accountId = recordFields[0]; // Assuming account ID is the first field
+            double transactionBalance = Double.parseDouble(recordFields[1]); // Assuming balance is the second field
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    // Update account with accumulated interest
+                    updateAccountBalances(Map.of(previousAccountId, accumulatedInterest));
+                }
+                accumulatedInterest = 0.0;
+                previousAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Simulated interest rate
+            accumulatedInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (previousAccountId != null) {
+            updateAccountBalances(Map.of(previousAccountId, accumulatedInterest));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        String accountId = accountData.get("accountId");
+        String xrefId = xrefData.get("xrefId");
+
+        if (accountId == null || xrefId == null) {
+            throw new IllegalArgumentException("Invalid account or cross-reference data.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            String accountId = entry.getKey();
+            double accumulatedInterest = entry.getValue();
+
+            // Simulate account update logic
+            System.out.println("Updated account " + accountId + " with interest: " + accumulatedInterest);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        for (Map.Entry<String, String> entry : transactionData.entrySet()) {
+            String transactionId = entry.getKey();
+            String transactionDetails = entry.getValue();
+
+            // Simulate transaction record creation logic
+            System.out.println("Created transaction record " + transactionId + ": " + transactionDetails);
+        }
+    }
+
+    // Method to handle file operations with error handling
+    public static void handleFileOperations(BufferedReader file) throws IOException {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+            // Simulate file operation
+            file.readLine();
+        } catch (IOException e) {
+            logError(e);
+            throw e;
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "Error occurred: " + e.getMessage(), e);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader != null) {
+                fileReader.close();
+            }
+        }
+    }
+
+    // Method to process records from Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String previousAccountId = null;
+        double accumulatedInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            // Simulate record processing logic
+            String[] recordFields = line.split(",");
+            String accountId = recordFields[0]; // Assuming account ID is the first field
+            double transactionBalance = Double.parseDouble(recordFields[1]); // Assuming balance is the second field
+
+            if (!accountId.equals(previousAccountId)) {
+                if (previousAccountId != null) {
+                    // Update account with accumulated interest
+                    updateAccountBalances(Map.of(previousAccountId, accumulatedInterest));
+                }
+                accumulatedInterest = 0.0;
+                previousAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Simulated interest rate
+            accumulatedInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+        }
+
+        // Final update for the last account
+        if (previousAccountId != null) {
+            updateAccountBalances(Map.of(previousAccountId, accumulatedInterest));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Simulate data retrieval logic
+        String accountId = accountData.get("accountId");
+        String xrefId = xrefData.get("xrefId");
+
+        if (accountId == null || xrefId == null) {
+            throw new IllegalArgumentException("Invalid account or cross-reference data.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData) {
+        for (Map.Entry<String, Double> entry : accountData.entrySet()) {
+            String accountId = entry.getKey();
+            double accumulatedInterest = entry.getValue();
+
+            // Simulate account update logic
+            System.out.println("Updated account " + accountId + " with interest: " + accumulatedInterest);
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        for (Map.Entry<String, String> entry : transactionData.entrySet()) {
+            String transactionId = entry.getKey();
+            String transactionDetails = entry.getValue();
+
+            // Simulate transaction record creation logic
+            System.out.println("Created transaction record " + transactionId + ": " + transactionDetails);
+        }
+    }
+
+    // Method to handle file operations with error handling
+    public static void handleFileOperations(BufferedReader file) throws IOException {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+            // Simulate file operation
+            file.readLine();
+        } catch (IOException e) {
+            logError(e);
+            throw e;
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "Error occurred: " + e.getMessage(), e);
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader reader = entry.getValue();
+            if (reader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader reader = entry.getValue();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                    throw e;
+                }
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Simulate updating the account with accumulated interest
+                    updateAccountBalances(Map.of("accountId", lastAccountId, "interest", String.valueOf(totalInterest)));
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Simulated interest rate
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            updateAccountBalances(Map.of("accountId", lastAccountId, "interest", String.valueOf(totalInterest)));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> crossReferenceData) {
+        // Simulate data retrieval logic
+        if (accountData.isEmpty() || crossReferenceData.isEmpty()) {
+            throw new IllegalArgumentException("Account or Cross-Reference data is missing.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, String> accountData) {
+        // Simulate updating account balances
+        if (!accountData.containsKey("accountId") || !accountData.containsKey("interest")) {
+            throw new IllegalArgumentException("Invalid account data.");
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        // Simulate creating transaction records
+        if (!transactionData.containsKey("description") || !transactionData.containsKey("amount") || !transactionData.containsKey("timestamp")) {
+            throw new IllegalArgumentException("Invalid transaction data.");
+        }
+    }
+
+    // Method to handle file errors
+    public static void handleFileErrors(BufferedReader file) {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+        } catch (IOException e) {
+            logger.severe("File error: " + e.getMessage());
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.severe("Error occurred: " + e.getMessage());
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader reader = entry.getValue();
+            if (reader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader reader = entry.getValue();
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    logger.severe("Error closing file: " + entry.getKey() + " - " + e.getMessage());
+                    throw e;
+                }
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            // Simulate record processing logic
+            String[] record = line.split(",");
+            String accountId = record[0];
+            double transactionBalance = Double.parseDouble(record[1]);
+
+            if (!accountId.equals(lastAccountId)) {
+                if (lastAccountId != null) {
+                    // Simulate updating the account with accumulated interest
+                    updateAccountBalances(Map.of("accountId", lastAccountId, "interest", String.valueOf(totalInterest)));
+                }
+                totalInterest = 0.0;
+                lastAccountId = accountId;
+            }
+
+            double interestRate = 5.0; // Simulated interest rate
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+        }
+
+        if (lastAccountId != null) {
+            updateAccountBalances(Map.of("accountId", lastAccountId, "interest", String.valueOf(totalInterest)));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> crossReferenceData) {
+        // Simulate data retrieval logic
+        if (accountData.isEmpty() || crossReferenceData.isEmpty()) {
+            throw new IllegalArgumentException("Account or Cross-Reference data is missing.");
+        }
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, String> accountData) {
+        // Simulate updating account balances
+        if (!accountData.containsKey("accountId") || !accountData.containsKey("interest")) {
+            throw new IllegalArgumentException("Invalid account data.");
+        }
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecords(Map<String, String> transactionData) {
+        // Simulate creating transaction records
+        if (!transactionData.containsKey("description") || !transactionData.containsKey("amount") || !transactionData.containsKey("timestamp")) {
+            throw new IllegalArgumentException("Invalid transaction data.");
+        }
+    }
+
+    // Method to handle file errors
+    public static void handleFileErrors(BufferedReader file) {
+        try {
+            if (file == null) {
+                throw new IOException("File is null.");
+            }
+        } catch (IOException e) {
+            logger.severe("File error: " + e.getMessage());
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.severe("Error occurred: " + e.getMessage());
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() != null) {
+                entry.getValue().close();
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] record = line.split(",");
+            String accountId = record[0]; // Assuming account ID is the first field
+            double transactionBalance = Double.parseDouble(record[1]); // Assuming balance is the second field
+
+            if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                // Update account with accumulated interest
+                updateAccountBalances(Map.of("balance", 0.0, "interest", totalInterest));
+                totalInterest = 0.0;
+            }
+
+            // Calculate interest for the current record
+            double interestRate = 5.0; // Placeholder for interest rate retrieval logic
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+            lastAccountId = accountId;
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccountBalances(Map.of("balance", 0.0, "interest", totalInterest));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Placeholder for data retrieval logic
+        // Simulate fetching data from a database or file
+        accountData.put("accountId", "mockAccount");
+        xrefData.put("xrefId", "mockXref");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Object> account) {
+        double balance = (double) account.get("balance");
+        double interest = (double) account.get("interest");
+        balance += interest;
+
+        // Resetting cycle credit and debit amounts (placeholders)
+        account.put("cycleCredit", 0.0);
+        account.put("cycleDebit", 0.0);
+
+        // Simulate updating the account in a database
+        account.put("balance", balance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, Object> transaction) {
+        // Simulate writing the transaction record to a database or file
+        transaction.put("status", "recorded");
+    }
+
+    // Method to handle file operations with error handling
+    public static void handleFileOperations(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null");
+        }
+        // Simulate file operations
+        file.readLine();
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() == null) {
+                throw new IOException("Failed to open file: " + entry.getKey());
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            if (entry.getValue() != null) {
+                entry.getValue().close();
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] record = line.split(",");
+            String accountId = record[0]; // Assuming account ID is the first field
+            double transactionBalance = Double.parseDouble(record[1]); // Assuming balance is the second field
+
+            if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                // Update account with accumulated interest
+                updateAccountBalances(Map.of("balance", 0.0, "interest", totalInterest));
+                totalInterest = 0.0;
+            }
+
+            // Calculate interest for the current record
+            double interestRate = 5.0; // Placeholder for interest rate retrieval logic
+            totalInterest += calculateMonthlyInterest(transactionBalance, interestRate);
+            lastAccountId = accountId;
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccountBalances(Map.of("balance", 0.0, "interest", totalInterest));
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> xrefData) {
+        // Placeholder for data retrieval logic
+        // Simulate fetching data from a database or file
+        accountData.put("accountId", "mockAccount");
+        xrefData.put("xrefId", "mockXref");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Object> account) {
+        double balance = (double) account.get("balance");
+        double interest = (double) account.get("interest");
+        balance += interest;
+
+        // Resetting cycle credit and debit amounts (placeholders)
+        account.put("cycleCredit", 0.0);
+        account.put("cycleDebit", 0.0);
+
+        // Simulate updating the account in a database
+        account.put("balance", balance);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, Object> transaction) {
+        // Simulate writing the transaction record to a database or file
+        transaction.put("status", "recorded");
+    }
+
+    // Method to handle file operations with error handling
+    public static void handleFileOperations(BufferedReader file) throws IOException {
+        if (file == null) {
+            throw new IOException("File is null");
+        }
+        // Simulate file operations
+        file.readLine();
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, String> files) throws IOException {
+        for (Map.Entry<String, String> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            String fileContent = entry.getValue();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+                writer.write(fileContent);
+            } catch (IOException e) {
+                logger.severe("Error opening file: " + fileName + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(List<String> fileHandles) {
+        for (String fileHandle : fileHandles) {
+            try {
+                // Simulate file closure (in real scenarios, this would involve closing streams)
+                System.out.println("Closing file: " + fileHandle);
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + fileHandle + " - " + e.getMessage());
+            }
+        }
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(List<String> records) {
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        for (String record : records) {
+            recordCount++;
+            String currentAccountId = extractAccountId(record);
+
+            if (lastAccountId != null && !lastAccountId.equals(currentAccountId)) {
+                updateAccountWithInterest(lastAccountId, totalInterest);
+                totalInterest = 0.0;
+            }
+
+            totalInterest += calculateInterestForRecord(record);
+            lastAccountId = currentAccountId;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountWithInterest(lastAccountId, totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountData(String accountId) {
+        Map<String, String> accountData = new HashMap<>();
+        accountData.put("accountId", accountId);
+        accountData.put("accountName", "Mock Account Name");
+        accountData.put("crossReference", "Mock Cross Reference");
+        return accountData;
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        System.out.println("Updating account: " + accountId + " with interest: " + accumulatedInterest);
+        // Simulate updating account in a database
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        System.out.println("Creating transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+        // Simulate writing transaction record to a database
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(String fileName) {
+        logger.warning("Error handling file: " + fileName);
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(String errorMessage, String timestamp) {
+        logger.severe("Error occurred at " + timestamp + ": " + errorMessage);
+    }
+
+    // Helper method to extract account ID from a record (mock implementation)
+    private static String extractAccountId(String record) {
+        return "MockAccountId"; // Replace with actual logic to extract account ID
+    }
+
+    // Helper method to calculate interest for a record (mock implementation)
+    private static double calculateInterestForRecord(String record) {
+        return 10.0; // Replace with actual logic to calculate interest
+    }
+
+    // Helper method to update account with accumulated interest (mock implementation)
+    private static void updateAccountWithInterest(String accountId, double totalInterest) {
+        System.out.println("Updating account: " + accountId + " with total interest: " + totalInterest);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, String> files) throws IOException {
+        for (Map.Entry<String, String> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            String fileContent = entry.getValue();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+                writer.write(fileContent);
+            } catch (IOException e) {
+                logger.severe("Error opening file: " + fileName + " - " + e.getMessage());
+                throw e;
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(List<String> fileHandles) {
+        for (String fileHandle : fileHandles) {
+            try {
+                // Simulate file closure (in real scenarios, this would involve closing streams)
+                System.out.println("Closing file: " + fileHandle);
+            } catch (Exception e) {
+                logger.severe("Error closing file: " + fileHandle + " - " + e.getMessage());
+            }
+        }
+    }
+
+    // Method to process records from the transaction category balance file
+    public static void processRecords(List<String> records) {
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        for (String record : records) {
+            recordCount++;
+            String currentAccountId = extractAccountId(record);
+
+            if (lastAccountId != null && !lastAccountId.equals(currentAccountId)) {
+                updateAccountWithInterest(lastAccountId, totalInterest);
+                totalInterest = 0.0;
+            }
+
+            totalInterest += calculateInterestForRecord(record);
+            lastAccountId = currentAccountId;
+        }
+
+        if (lastAccountId != null) {
+            updateAccountWithInterest(lastAccountId, totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static Map<String, String> retrieveAccountData(String accountId) {
+        Map<String, String> accountData = new HashMap<>();
+        accountData.put("accountId", accountId);
+        accountData.put("accountName", "Mock Account Name");
+        accountData.put("crossReference", "Mock Cross Reference");
+        return accountData;
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateMonthlyInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(String accountId, double accumulatedInterest) {
+        System.out.println("Updating account: " + accountId + " with interest: " + accumulatedInterest);
+        // Simulate updating account in a database
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(String description, double amount, String timestamp) {
+        System.out.println("Creating transaction record: " + description + ", Amount: " + amount + ", Timestamp: " + timestamp);
+        // Simulate writing transaction record to a database
+    }
+
+    // Method to handle file errors
+    public static void handleFileError(String fileName) {
+        logger.warning("Error handling file: " + fileName);
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(String errorMessage, String timestamp) {
+        logger.severe("Error occurred at " + timestamp + ": " + errorMessage);
+    }
+
+    // Helper method to extract account ID from a record (mock implementation)
+    private static String extractAccountId(String record) {
+        return "MockAccountId"; // Replace with actual logic to extract account ID
+    }
+
+    // Helper method to calculate interest for a record (mock implementation)
+    private static double calculateInterestForRecord(String record) {
+        return 10.0; // Replace with actual logic to calculate interest
+    }
+
+    // Helper method to update account with accumulated interest (mock implementation)
+    private static void updateAccountWithInterest(String accountId, double totalInterest) {
+        System.out.println("Updating account: " + accountId + " with total interest: " + totalInterest);
+    }
+}
+```
+
+## LLM Response (java)
+
+```
+```java
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader != null) {
+                fileReader.close();
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] fields = line.split(","); // Assuming CSV format
+            String accountId = fields[0];
+            double transactionBalance = Double.parseDouble(fields[1]);
+
+            if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                // Update account with accumulated interest
+                updateAccountBalances(new HashMap<>(), totalInterest);
+                totalInterest = 0.0;
+            }
+
+            // Calculate interest for the current record
+            double interestRate = 5.0; // Placeholder for interest rate retrieval logic
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+            lastAccountId = accountId;
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccountBalances(new HashMap<>(), totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> crossReferenceData) {
+        // Simulate data retrieval logic
+        accountData.put("accountId", "mockAccount");
+        crossReferenceData.put("xrefId", "mockXref");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData, double accumulatedInterest) {
+        double currentBalance = accountData.getOrDefault("accountBalance", 0.0);
+        accountData.put("accountBalance", currentBalance + accumulatedInterest);
+        accountData.put("currentCycleCredit", 0.0);
+        accountData.put("currentCycleDebit", 0.0);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transactionRecord) {
+        // Simulate writing transaction record to a file or database
+        transactionRecord.put("status", "created");
+    }
+
+    // Method to handle errors during file operations
+    public static void handleFileErrors(BufferedReader file) {
+        try {
+            if (file != null) {
+                file.readLine(); // Simulate file operation
+            }
+        } catch (IOException e) {
+            logError(e);
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
+    }
+}
+```
+```
+
+## Extracted Code (java)
+
+```
+import java.io.*;
+import java.util.*;
+import java.util.logging.*;
+
+public class Solution {
+
+    private static final Logger logger = Logger.getLogger(Solution.class.getName());
+
+    // Method to open required files for processing
+    public static void openFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            String fileName = entry.getKey();
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader == null) {
+                throw new IOException("Failed to open file: " + fileName);
+            }
+        }
+    }
+
+    // Method to close all files after processing
+    public static void closeFiles(Map<String, BufferedReader> files) throws IOException {
+        for (Map.Entry<String, BufferedReader> entry : files.entrySet()) {
+            BufferedReader fileReader = entry.getValue();
+            if (fileReader != null) {
+                fileReader.close();
+            }
+        }
+    }
+
+    // Method to process records from the Transaction Category Balance File
+    public static void processRecords(BufferedReader file) throws IOException {
+        String line;
+        int recordCount = 0;
+        String lastAccountId = null;
+        double totalInterest = 0.0;
+
+        while ((line = file.readLine()) != null) {
+            recordCount++;
+            String[] fields = line.split(","); // Assuming CSV format
+            String accountId = fields[0];
+            double transactionBalance = Double.parseDouble(fields[1]);
+
+            if (lastAccountId != null && !lastAccountId.equals(accountId)) {
+                // Update account with accumulated interest
+                updateAccountBalances(new HashMap<>(), totalInterest);
+                totalInterest = 0.0;
+            }
+
+            // Calculate interest for the current record
+            double interestRate = 5.0; // Placeholder for interest rate retrieval logic
+            totalInterest += calculateInterest(transactionBalance, interestRate);
+            lastAccountId = accountId;
+        }
+
+        // Final update for the last account
+        if (lastAccountId != null) {
+            updateAccountBalances(new HashMap<>(), totalInterest);
+        }
+    }
+
+    // Method to retrieve account and cross-reference data
+    public static void retrieveData(Map<String, String> accountData, Map<String, String> crossReferenceData) {
+        // Simulate data retrieval logic
+        accountData.put("accountId", "mockAccount");
+        crossReferenceData.put("xrefId", "mockXref");
+    }
+
+    // Method to calculate monthly interest
+    public static double calculateInterest(double transactionBalance, double interestRate) {
+        return (transactionBalance * interestRate) / 1200;
+    }
+
+    // Method to update account balances
+    public static void updateAccountBalances(Map<String, Double> accountData, double accumulatedInterest) {
+        double currentBalance = accountData.getOrDefault("accountBalance", 0.0);
+        accountData.put("accountBalance", currentBalance + accumulatedInterest);
+        accountData.put("currentCycleCredit", 0.0);
+        accountData.put("currentCycleDebit", 0.0);
+    }
+
+    // Method to create transaction records for calculated interest
+    public static void createTransactionRecord(Map<String, String> transactionRecord) {
+        // Simulate writing transaction record to a file or database
+        transactionRecord.put("status", "created");
+    }
+
+    // Method to handle errors during file operations
+    public static void handleFileErrors(BufferedReader file) {
+        try {
+            if (file != null) {
+                file.readLine(); // Simulate file operation
+            }
+        } catch (IOException e) {
+            logError(e);
+        }
+    }
+
+    // Method to log errors and exceptions
+    public static void logError(Exception e) {
+        logger.log(Level.SEVERE, "An error occurred: " + e.getMessage(), e);
+    }
+}
+```
