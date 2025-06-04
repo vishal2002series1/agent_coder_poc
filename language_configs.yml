@@ -1,0 +1,52 @@
+# language_configs.yml
+# Configuration for different target programming languages
+
+python:
+  file_extension: ".py"
+  # execution_command should ideally use sys.executable for portability
+  # For simplicity here, it's 'python'.
+  execution_command: ["python"]
+  compile_command: null # Python is interpreted, no explicit compile command for this setup
+  code_block_marker: "```python"
+  test_framework: "assert" # Basic assertions; could be 'pytest' for more advanced setups
+  package_manager: "pip"
+  # List of common, generally safe packages. This can be expanded.
+  allowed_packages:
+    - "textblob"
+    - "nltk"
+    - "scikit-learn"
+    - "pandas"
+    - "numpy"
+  timeout: 30 # Execution timeout in seconds
+
+java:
+  file_extension: ".java"
+  execution_command: ["java"]
+  compile_command: ["javac"]
+  code_block_marker: "```java"
+  test_framework: "junit" # Assumes JUnit 4/5 style, potentially run via a main method for simplicity
+  package_manager: "maven"
+  # Common and generally safe Java packages.
+  allowed_packages:
+    - "junit:junit"          # For testing
+    - "org.mockito:mockito-core" # For mocking
+    - "org.apache.commons:commons-lang3" # General utilities
+    - "com.google.gson:gson" # JSON processing
+    - "org.apache.httpcomponents:httpclient" # HTTP client
+    # Add other common and safe packages as needed
+  timeout: 60 # Slightly longer timeout for Java due to compilation and JVM startup
+
+csharp:
+  file_extension: ".cs"
+  execution_command: ["dotnet", "run"]
+  compile_command: ["dotnet", "build"]
+  code_block_marker: "```csharp"
+  test_framework: "nunit" # NUnit is a common framework for C#
+  package_manager: "nuget"
+  # Common and generally safe C# packages.
+  allowed_packages:
+    - "NUnit"
+    - "Moq"
+    - "Newtonsoft.Json"
+    # Add other common and safe packages as needed
+  timeout: 60 # Slightly longer timeout for C# due to .NET build/run
