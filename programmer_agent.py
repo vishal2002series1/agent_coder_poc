@@ -80,6 +80,28 @@ class ProgrammerAgent:
         - Make sure the class name matches what the tests expect
         ** Generated code should not contain any test cases. **
         """
+            
+        elif self.target_language == TargetLanguage.CSHARP:
+            prompt = f"""
+            You are an expert C# programmer. Generate a complete, runnable C# program that satisfies the following requirements and passes all the provided tests.
+
+            REQUIREMENTS:
+            {requirements}
+
+            TESTS TO PASS:
+            {tests}
+
+            IMPORTANT C# REQUIREMENTS:
+            - The code MUST be a complete, runnable program.
+            - Use the exact same field names and data structures as shown in the tests.
+            - **Always include all necessary using statements at the top of the file.**
+            - Generate clean, well-documented implementation code.
+            - Ensure the class name and method signatures you define are consistent with how the tests would invoke them.
+            - **Generated code should not contain any test cases.**
+            - DO NOT use any test frameworks like NUnit. Write the code as a simple console application.
+            - Use dependencies supported by NuGet only. Do not use any other libraries or frameworks.
+            """
+
         else:
             prompt = f"""
         You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.

@@ -797,12 +797,17 @@ class JavaTestExecutor(BaseTestExecutor):
 
 class CSharpTestExecutor(BaseTestExecutor):
     def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
-        # Create a complete C# project structure
         self.install_dependencies(code)
         self.install_dependencies(tests)
-        full_code = self._create_csharp_project(code, tests)
-
-        compile_result = self._compile_code(full_code)
+        project_dir = self.temp_dir
+        source_file = os.path.join(project_dir, "Program.cs")
+        # Combine code and tests into a single file
+        with open(source_file, 'w') as f:
+            f.write(code + "\n\n" + tests)
+        # Create .csproj file
+        self._create_csproj(project_dir)
+        # Compile
+        compile_result = self._compile_code(project_dir)
         if not compile_result["success"]:
             return {
                 "success": False,
@@ -811,71 +816,44 @@ class CSharpTestExecutor(BaseTestExecutor):
                 "error_type": "CompilationError",
                 "feedback": f"Compilation Error: {compile_result['error']}"
             }
+        # Run
+        return self._Code_Execution(project_dir)
 
-        return self._Code_Execution(full_code)
+    def _create_csproj(self, project_dir):
+        csproj_content = """
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+</Project>
+"""
+        with open(os.path.join(project_dir, "TestProject.csproj"), 'w') as f:
+            f.write(csproj_content)
 
-    def _create_csharp_project(self, code: str, tests: str) -> str:
-        return f"""
-                using System;
-
-                {code}
-
-                // Test Cases
-                {tests}
-
-                class Program {{
-                    static void Main(string[] args) {{
-                        // Run tests here
-                        Console.WriteLine("All tests passed successfully!");
-                    }}
-                }}
-                """
-
-    def _compile_code(self, code: str) -> Dict[str, Any]:
-        # Create project file and source file
-        project_file = os.path.join(self.temp_dir, "TestProject.csproj")
-        source_file = os.path.join(self.temp_dir, "Program.cs")
-
+    def _compile_code(self, project_dir: str) -> Dict[str, Any]:
         try:
-            # Create .csproj file
-            with open(project_file, 'w') as f:
-                f.write("""
-                    <Project Sdk="Microsoft.NET.Sdk">
-                    <PropertyGroup>
-                        <OutputType>Exe</OutputType>
-                        <TargetFramework>net6.0</TargetFramework>
-                    </PropertyGroup>
-                    </Project>
-                    """)
-
-            # Create source file
-            with open(source_file, 'w') as f:
-                f.write(code)
-
             result = subprocess.run(
-                ["dotnet", "build", self.temp_dir],
+                ["dotnet", "build", project_dir],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=60
             )
-
             if result.returncode == 0:
                 return {"success": True, "error": None}
             else:
                 return {"success": False, "error": result.stderr}
-
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    def _Code_Execution(self, code: str) -> Dict[str, Any]:
+    def _Code_Execution(self, project_dir: str) -> Dict[str, Any]:
         try:
             result = subprocess.run(
-                ["dotnet", "run", "--project", self.temp_dir],
+                ["dotnet", "run", "--project", project_dir],
                 capture_output=True,
                 text=True,
                 timeout=self.lang_config["timeout"]
             )
-
             if result.returncode == 0:
                 return {
                     "success": True,
@@ -892,7 +870,6 @@ class CSharpTestExecutor(BaseTestExecutor):
                     "error_type": "RuntimeError",
                     "feedback": f"Runtime Error: {result.stderr}"
                 }
-
         except Exception as e:
             return {
                 "success": False,
@@ -901,15 +878,16 @@ class CSharpTestExecutor(BaseTestExecutor):
                 "error_type": "ExecutionError",
                 "feedback": f"Execution Error: {str(e)}"
             }
+
     def install_dependencies(self, code: str):
-        # Find all using statements
+        import re
         usings = re.findall(r'^\s*using ([\w\.]+);', code, re.MULTILINE)
         std_libs = {'System', 'System.Collections', 'System.IO', 'System.Linq', 'System.Text', 'System.Threading', 'System.Net'}
         to_install = [pkg for pkg in set(usings) if not any(pkg.startswith(std) for std in std_libs)]
         for pkg in to_install:
             try:
                 print(f"Installing C# package: {pkg}")
-                subprocess.run(["dotnet", "add", "package", pkg], check=True)
+                subprocess.run(["dotnet", "add", self.temp_dir, "package", pkg], check=True)
             except Exception as e:
                 print(f"Failed to install {pkg}: {e}")
 

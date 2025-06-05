@@ -31,7 +31,7 @@ class AgentCoderPOC:
         )
 
         self.test_executor = TestExecutorFactory.create_executor(target_language)
-        self.max_iterations = 10
+        self.max_iterations = 3
         self.results_log = []
 
         # Initialize retry-related attributes
@@ -228,7 +228,7 @@ def main():
 
     # Example: Test with different languages
     # languages_to_test = [TargetLanguage.PYTHON, TargetLanguage.JAVA, TargetLanguage.CSHARP]
-    languages_to_test = [TargetLanguage.PYTHON, TargetLanguage.JAVA]
+    languages_to_test = [TargetLanguage.CSHARP]
     # languages_to_test=[TargetLanguage.JAVA]
 
     requirements = """
@@ -534,6 +534,10 @@ def main():
 	}
 ]
 '''
+    requirements = '''
+    Create a C# program that prints "Hello, C#!" to the console.
+
+    '''
 
     
     for target_language in languages_to_test:

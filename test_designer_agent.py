@@ -111,7 +111,7 @@ class TestDesignerAgent:
                 """,
                         "Csharp": """
                 Create simple assertion-based tests that can run in Main method.
-                DO NOT use NUnit or other testing frameworks.
+                
                 Use simple if statements and throw exceptions for failures.
                 Example:
                 static void TestFunction() {
@@ -201,23 +201,33 @@ class TestDesignerAgent:
         """,
 
                     "Csharp": """
-            RELAXED C# TESTING RULES:
+    **RELAXED C# TESTING RULES**:
 
-            Use try-catch blocks to handle exceptions
-            Check for basic conditions like "result != null"
-            Print success/failure messages
-            Example:
-            static void TestFunction() {
-                try {
-                    string result = FunctionName("input");
-                    if (result == null)
-                        throw new Exception("Function should return something");
-                    Console.WriteLine("PASS TestFunction passed");
-                } catch (Exception e) {
-                    Console.WriteLine($"FAIL TestFunction failed: {e.Message}");
-                }
+    - The test class name MUST be different from the main implementation class. If the main class is `HelloWorldProgram`, name the test class `HelloWorldProgramTests`.
+    - The test class should call the methods of the main class.
+    - Use try-catch blocks to handle exceptions
+    - Check for basic conditions like "result != null"
+    - Print success/failure messages
+    - DO NOT use any test frameworks like NUnit. Write the code as a simple console application.
+
+    - Example:
+    ```csharp
+    public class HelloWorldProgramTests {
+        public static void TestPrintMessage() {
+            try {
+                HelloWorldProgram.PrintMessage();
+                Console.WriteLine("PASS: TestPrintMessage passed");
+            } catch (Exception e) {
+                Console.WriteLine($"FAIL: TestPrintMessage failed: {e.Message}");
             }
-            """
+        }
+
+        public static void Main(string[] args) {
+            TestPrintMessage();
+        }
+    }
+    ```
+    """
         }
         return instructions.get(language_name, "")
 
