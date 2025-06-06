@@ -1,0 +1,15 @@
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\bin\Debug\net9.0\MyHelloWorldApp.exe
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\bin\Debug\net9.0\MyHelloWorldApp.deps.json
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\bin\Debug\net9.0\MyHelloWorldApp.runtimeconfig.json
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\bin\Debug\net9.0\MyHelloWorldApp.dll
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\bin\Debug\net9.0\MyHelloWorldApp.pdb
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.AssemblyInfoInputs.cache
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.AssemblyInfo.cs
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.csproj.CoreCompileInputs.cache
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.sourcelink.json
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.dll
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\refint\MyHelloWorldApp.dll
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.pdb
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\MyHelloWorldApp.genruntimeconfig.cache
+C:\Users\XP343UZ\source\repos\agent_coder_poc\MyHelloWorldApp\obj\Debug\net9.0\ref\MyHelloWorldApp.dll

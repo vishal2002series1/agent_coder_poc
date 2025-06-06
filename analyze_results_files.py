@@ -97,6 +97,64 @@ def analyze_results_java():
     except Exception as e:
         print(f"Error analyzing Java results: {e}")
 
+
+def analyze_results_csharp():
+    try:
+        with open('agentcoder_results_csharp.json', 'r') as f:
+            results = json.load(f)
+
+        print("\n=== AGENTCODER RESULTS ANALYSIS (CSharp) ===\n")
+
+        print(f"Success: {results['success']}")
+        print(f"Total Iterations: {results['iterations']}")
+        print(f"Error: {results.get('error', 'N/A')}")
+
+        if 'log' in results:
+            print(f"\n=== ITERATION DETAILS ===")
+            for i, iteration in enumerate(results['log']):
+                print(f"\n--- Iteration {iteration['iteration']} ---")
+                print(f"Code Length: {len(iteration['code'])} characters")
+                print(f"Execution Success: {iteration['execution_result']['success']}")
+                if not iteration['execution_result']['success']:
+                    print(f"Error Type: {iteration['execution_result']['error_type']}")
+                    print(f"Error: {iteration['execution_result']['error'][:200]}...")
+
+        # Show the final code that was generated and save it
+        if 'final_code' in results and results['final_code']:
+            print(f"\n=== FINAL CSHARP CODE ===")
+            print(results['final_code'])
+            
+            # Save the final Java code to a file
+            # Assuming the Java code includes a class name, you might want to extract it
+            # For simplicity, let's save to a generic name for now or try to parse class name
+            java_code = results['final_code']
+            class_name = "AgentCoderGenerated" # Default
+            
+            # A simple (and potentially fragile) way to extract class name for file naming
+            import re
+            match = re.search(r'public\s+class\s+([a-zA-Z0-9_]+)', java_code)
+            if match:
+                class_name = match.group(1)
+            
+            output_file_name = f"{class_name}.cs"
+            output_file_name = "generated_csharp_code.cs"
+            with open(output_file_name, 'w') as f:
+                f.write(java_code)
+            print(f"\nSuccessfully saved final CSharp code to {output_file_name}")
+
+        # Show the tests that were used
+        if 'tests' in results and results['tests']:
+            print(f"\n=== TESTS USED (CSharp) ===")
+            print(results['tests'])
+
+    except FileNotFoundError:
+        print("Results file 'agentcoder_results_java.json' not found. Make sure you've run the POC first.")
+    except Exception as e:
+        print(f"Error analyzing Java results: {e}")
+
+
+
 if __name__ == "__main__":
-    analyze_results()
-    analyze_results_java()
+    # analyze_results()
+    # analyze_results_java()
+    analyze_results_csharp()

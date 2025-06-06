@@ -203,27 +203,33 @@ class TestDesignerAgent:
                     "Csharp": """
     **RELAXED C# TESTING RULES**:
 
-    - The test class name MUST be different from the main implementation class. If the main class is `HelloWorldProgram`, name the test class `HelloWorldProgramTests`.
+    - DO NOT redefine or include the implementation class in the test code. Only reference it.
+    - The test class name MUST be different from the main implementation class. If the main class is `StringUtilities`, name the test class `StringUtilitiesTests`.
     - The test class should call the methods of the main class.
-    - Use try-catch blocks to handle exceptions
-    - Check for basic conditions like "result != null"
-    - Print success/failure messages
+    - Use try-catch blocks to handle exceptions.
+    - Check for basic conditions like "result != null".
+    - Print success/failure messages.
     - DO NOT use any test frameworks like NUnit. Write the code as a simple console application.
+    - **DO NOT include any example or reference implementation class in the test code. Only include the test class.**
 
     - Example:
     ```csharp
-    public class HelloWorldProgramTests {
-        public static void TestPrintMessage() {
+    public class StringUtilitiesTests {
+        public static void TestBasicExecution() {
             try {
-                HelloWorldProgram.PrintMessage();
-                Console.WriteLine("PASS: TestPrintMessage passed");
+                string result = StringUtilities.ReverseString("hello");
+                if (result != null)
+                    Console.WriteLine("PASS: TestBasicExecution passed");
+                else
+                    Console.WriteLine("FAIL: TestBasicExecution returned null");
             } catch (Exception e) {
-                Console.WriteLine($"FAIL: TestPrintMessage failed: {e.Message}");
+                Console.WriteLine(\$"FAIL: TestBasicExecution failed: {e.Message}");
             }
         }
 
         public static void Main(string[] args) {
-            TestPrintMessage();
+            TestBasicExecution();
+            // Add more test methods here
         }
     }
     ```

@@ -9,12 +9,39 @@ from language_config import TargetLanguage, LanguageConfig
 import re
 import requests
 # from bs4 import BeautifulSoup  # Import BeautifulSoup
+# print("Loaded test_executor_factory.py from:", __file__)
+print("DEBUG: Loaded test_executor_factory.py from:", __file__)
+
+def debug_csharp_methods():
+    for name, obj in globals().items():
+        if name == "CSharpTestExecutor":
+            print("CSharpTestExecutor methods:", dir(obj))
+debug_csharp_methods()
 
 def extract_public_class_name(java_code: str) -> str:
     match = re.search(r'public\s+class\s+(\w+)', java_code)
     if match:
         return match.group(1)
     raise ValueError("No public class found in Java code.")
+
+def remove_duplicate_implementation(test_code: str, class_name: str) -> str:
+    """
+    Removes any public class definition for the implementation class from the test code.
+    This prevents compilation errors due to duplicate class definitions.
+    """
+    # This regex matches 'public class <class_name> { ... }' including all content inside the braces
+    pattern = rf'public\s+class\s+{class_name}\s*\{{[^{{}}]*(?:\{{[^{{}}]*\}}[^{{}}]*)*\}}'
+    cleaned_code = re.sub(pattern, '', test_code, flags=re.MULTILINE | re.DOTALL)
+    return cleaned_code.strip()
+
+def extract_csharp_class_name(code: str) -> str:
+    """
+    Extract the public class name from C# code.
+    """
+    match = re.search(r'public\s+class\s+(\w+)', code)
+    if match:
+        return match.group(1)
+    return None
 
 class BaseTestExecutor(ABC):
     def __init__(self, target_language: TargetLanguage):
@@ -796,16 +823,63 @@ class JavaTestExecutor(BaseTestExecutor):
 
 
 class CSharpTestExecutor(BaseTestExecutor):
+
+    # import re
+
+    def _create_csproj(self, project_dir):
+        csproj_content = """
+            <Project Sdk="Microsoft.NET.Sdk">
+            <PropertyGroup>
+                <OutputType>Exe</OutputType>
+                <TargetFramework>net6.0</TargetFramework>
+            </PropertyGroup>
+            </Project>
+            """
+        with open(os.path.join(project_dir, "TestProject.csproj"), 'w') as f:
+            f.write(csproj_content)
+            
+    @staticmethod
+    def extract_usings(code: str) -> (list, str):
+        """
+        Extracts all using statements and returns (list_of_usings, code_without_usings)
+        """
+        usings = re.findall(r'^\s*using [\w\.]+;\s*', code, re.MULTILINE)
+        code_wo_usings = re.sub(r'^\s*using [\w\.]+;\s*', '', code, flags=re.MULTILINE)
+        return usings, code_wo_usings
+
     def execute_with_tests(self, code: str, tests: str) -> Dict[str, Any]:
         self.install_dependencies(code)
         self.install_dependencies(tests)
+        
+        # Extract the implementation class name
+        implementation_class_name = extract_csharp_class_name(code)
+        
+        # Remove any duplicate implementation class from test code
+        if implementation_class_name:
+            print(f"DEBUG: Checking for duplicate '{implementation_class_name}' class in test code...")
+            original_test_length = len(tests)
+            tests = remove_duplicate_implementation(tests, implementation_class_name)
+            if len(tests) < original_test_length:
+                print(f"DEBUG: Removed duplicate '{implementation_class_name}' class from test code.")
+        
         project_dir = self.temp_dir
         source_file = os.path.join(project_dir, "Program.cs")
-        # Combine code and tests into a single file
+
+        
+        
+        # In execute_with_tests:
+        impl_usings, code_wo_usings = self.extract_usings(code)
+        test_usings, tests_wo_usings = self.extract_usings(tests)
+        all_usings = sorted(set(impl_usings + test_usings))  # Deduplicate and sort for neatness
+
+        combined_code = ''.join(all_usings) + '\n' + code_wo_usings.strip() + '\n\n' + tests_wo_usings.strip()
+
         with open(source_file, 'w') as f:
-            f.write(code + "\n\n" + tests)
+            f.write(combined_code)
+        
         # Create .csproj file
         self._create_csproj(project_dir)
+        
         # Compile
         compile_result = self._compile_code(project_dir)
         if not compile_result["success"]:
@@ -816,21 +890,9 @@ class CSharpTestExecutor(BaseTestExecutor):
                 "error_type": "CompilationError",
                 "feedback": f"Compilation Error: {compile_result['error']}"
             }
+        
         # Run
         return self._Code_Execution(project_dir)
-
-    def _create_csproj(self, project_dir):
-        csproj_content = """
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
-  </PropertyGroup>
-</Project>
-"""
-        with open(os.path.join(project_dir, "TestProject.csproj"), 'w') as f:
-            f.write(csproj_content)
-
     def _compile_code(self, project_dir: str) -> Dict[str, Any]:
         try:
             result = subprocess.run(
@@ -839,6 +901,8 @@ class CSharpTestExecutor(BaseTestExecutor):
                 text=True,
                 timeout=60
             )
+            print("STDOUT:", result.stdout)
+            print("STDERR:", result.stderr)
             if result.returncode == 0:
                 return {"success": True, "error": None}
             else:

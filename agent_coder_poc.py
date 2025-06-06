@@ -31,7 +31,7 @@ class AgentCoderPOC:
         )
 
         self.test_executor = TestExecutorFactory.create_executor(target_language)
-        self.max_iterations = 3
+        self.max_iterations = 5
         self.results_log = []
 
         # Initialize retry-related attributes
@@ -238,7 +238,7 @@ def main():
     3. Handles edge cases like empty strings and null input.
     """
 
-    requirements = """
+    requirements1 = """
         User Story: Automated Customer Account Status Update
         As a Customer Service Representative (CSR),
         I want to have our customer account statuses automatically updated based on their recent activity and payment history,
@@ -278,7 +278,7 @@ def main():
 
     # requirements = "Implement a code to add two numbers."
 
-    requirements = '''
+    requirements1 = '''
 [  { "Cloud" : AWS,
       " Database" : sqllite"
       "Files" : S3
@@ -405,7 +405,7 @@ def main():
 ]
     '''
 
-    requirements = '''
+    requirements1 = '''
 
 [
 	{
@@ -534,7 +534,7 @@ def main():
 	}
 ]
 '''
-    requirements = '''
+    requirements1 = '''
     Create a C# program that prints "Hello, C#!" to the console.
 
     '''
