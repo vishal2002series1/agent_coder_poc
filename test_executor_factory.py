@@ -824,7 +824,74 @@ class JavaTestExecutor(BaseTestExecutor):
 
 class CSharpTestExecutor(BaseTestExecutor):
 
-    # import re
+    
+    @staticmethod
+    def extract_namespaces_from_usings(code: str):
+        """
+        Extracts all namespaces from 'using' statements in the code.
+        """
+        return set(re.findall(r'^\s*using ([\w\.]+);', code, re.MULTILINE))
+    
+    # def install_dependencies(self, code: str):
+    #     """
+    #     Dynamically install NuGet packages based on code analysis.
+    #     """
+    #     # 1. Extract namespaces from 'using' statements
+    #     namespaces = CSharpTestExecutor.extract_namespaces_from_usings(code)  # Call the static method
+        
+    #     print("Namespaces found:", namespaces)  # Print the namespaces for verification
+
+    def install_dependencies(self, code: str):
+        namespaces = CSharpTestExecutor.extract_namespaces_from_usings(code)
+        print("Namespaces found:", namespaces)
+
+        std_libs = {
+            'System', 'System.Collections', 'System.Collections.Generic', 'System.IO', 'System.Linq',
+            'System.Text', 'System.Threading', 'System.Net'
+        }
+
+        for ns in namespaces:
+            if ns in std_libs:
+                continue  # Skip standard libraries
+
+            # Try to install a package with the same name as the namespace
+            print(f"Trying to install NuGet package: {ns}")
+            result = subprocess.run(
+                ["dotnet", "add",  "package", ns],
+                cwd=self.temp_dir,  # Ensure command is run in temp directory
+                capture_output=True, text=True
+            )
+            if result.returncode == 0:
+                print(f"✓ Installed {ns}")
+                continue  # Success!
+
+            # If direct install fails, search NuGet
+            print(f"Direct install failed for {ns}. Searching NuGet...")
+            package = self.search_nuget_by_namespace(ns)
+            if package:
+                print(f"Found NuGet package '{package}' for namespace '{ns}', installing...")
+                result2 = subprocess.run(
+                    ["dotnet", "add", "package", package],
+                    cwd=self.temp_dir,  # Ensure command is run in temp directory
+                    capture_output=True, text=True
+                )
+                if result2.returncode == 0:
+                    print(f"✓ Installed {package}")
+                else:
+                    print(f"✗ Failed to install {package}: {result2.stderr}")
+            else:
+                print(f"✗ Could not resolve NuGet package for namespace: {ns}")
+
+    def search_nuget_by_namespace(self, namespace):
+        url = f"https://api-v2v3search-0.nuget.org/query?q={namespace}&prerelease=false"
+        try:
+            resp = requests.get(url, timeout=10)
+            data = resp.json()
+            if data['totalHits'] > 0:
+                return data['data'][0]['id']
+        except Exception as e:
+            print(f"NuGet search failed: {e}")
+        return None
 
     def _create_csproj(self, project_dir):
         csproj_content = """
@@ -837,7 +904,7 @@ class CSharpTestExecutor(BaseTestExecutor):
             """
         with open(os.path.join(project_dir, "TestProject.csproj"), 'w') as f:
             f.write(csproj_content)
-            
+
     @staticmethod
     def extract_usings(code: str) -> (list, str):
         """
@@ -897,6 +964,7 @@ class CSharpTestExecutor(BaseTestExecutor):
         try:
             result = subprocess.run(
                 ["dotnet", "build", project_dir],
+                cwd=self.temp_dir,  # Ensure command is run in temp directory
                 capture_output=True,
                 text=True,
                 timeout=60
@@ -914,6 +982,7 @@ class CSharpTestExecutor(BaseTestExecutor):
         try:
             result = subprocess.run(
                 ["dotnet", "run", "--project", project_dir],
+                cwd=self.temp_dir,  # Ensure command is run in temp directory
                 capture_output=True,
                 text=True,
                 timeout=self.lang_config["timeout"]
@@ -942,18 +1011,23 @@ class CSharpTestExecutor(BaseTestExecutor):
                 "error_type": "ExecutionError",
                 "feedback": f"Execution Error: {str(e)}"
             }
+    
 
-    def install_dependencies(self, code: str):
-        import re
-        usings = re.findall(r'^\s*using ([\w\.]+);', code, re.MULTILINE)
-        std_libs = {'System', 'System.Collections', 'System.IO', 'System.Linq', 'System.Text', 'System.Threading', 'System.Net'}
-        to_install = [pkg for pkg in set(usings) if not any(pkg.startswith(std) for std in std_libs)]
-        for pkg in to_install:
-            try:
-                print(f"Installing C# package: {pkg}")
-                subprocess.run(["dotnet", "add", self.temp_dir, "package", pkg], check=True)
-            except Exception as e:
-                print(f"Failed to install {pkg}: {e}")
+    # def install_dependencies(self, code: str):
+    #     import re
+    #     usings = re.findall(r'^\s*using ([\w\.]+);', code, re.MULTILINE)
+    #     std_libs = {'System', 'System.Collections', 'System.IO', 'System.Linq', 'System.Text', 'System.Threading', 'System.Net'}
+    #     to_install = [pkg for pkg in set(usings) if not any(pkg.startswith(std) for std in std_libs)]
+    #     for pkg in to_install:
+    #         try:
+    #             print(f"Installing C# package: {pkg}")
+    #             subprocess.run(["dotnet", "add", self.temp_dir, "package", pkg], check=True)
+    #         except Exception as e:
+    #             print(f"Failed to install {pkg}: {e}")
+    
+    
+    
+    
 
 class TestExecutorFactory:
     @staticmethod

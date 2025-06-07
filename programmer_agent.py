@@ -92,6 +92,8 @@ class ProgrammerAgent:
             {tests}
 
             IMPORTANT C# REQUIREMENTS:
+            - Do not use any external libraries or frameworks. 
+            - Strictly use internal .NET libraries and namespaces only.
             - The code MUST be a complete, runnable program.
             - Use the exact same field names and data structures as shown in the tests.
             - **Always include all necessary using statements at the top of the file.**
@@ -100,8 +102,11 @@ class ProgrammerAgent:
             - **Generated code should not contain any test cases.**
             - DO NOT use any test frameworks like NUnit. Write the code as a simple console application.
             - Use dependencies supported by NuGet only. Do not use any other libraries or frameworks.
+            - When using file I/O methods, ensure you use the correct method signatures as per .NET 6.0 documentation. For example, File.WriteAllText does not take a boolean for append; use File.AppendAllText to append, or use StreamWriter with the correct overload.
             """
-
+# - ** Generate C# code for .NET 6.0 or later. When using external libraries, always use NuGet packages and namespaces that are compatible with .NET 6.0 or later. Do not use legacy .NET Framework libraries. For database access, prefer Microsoft-maintained packages..**
+#             - Example: instead of using 'System.Data.Sqlite', use 'Microsoft.Data.Sqlite'. 
+#             - ** If you use Microsoft.Data.Sqlite, use the class SqliteConnection (not SQLiteConnection).**
         else:
             prompt = f"""
         You are an expert programmer. Generate {language_name} code that satisfies the following requirements and passes all the provided tests.
